@@ -65,10 +65,10 @@ VM::getToken() {
     std::string ret;
     
     // remove white space
-    while( !stream()->peekChar() && !IStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
+    while( stream()->peekChar() && IStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
     
     // get token
-    while( !stream()->peekChar() && !IStream::isSpace(stream()->peekChar()) ) {
+    while( stream()->peekChar() && !IStream::isSpace(stream()->peekChar()) ) {
         ret += stream()->getChar();
     }
 
@@ -125,6 +125,8 @@ VM::runCall(uint32_t word) {
 
 void
 VM::loadStream(IStream::Ptr strm) {
+    streams.push_back(strm);
+
     while( stream()->peekChar() && state == State::NO_ERROR ) {
         std::string tok = getToken();
 
@@ -156,6 +158,8 @@ VM::loadStream(IStream::Ptr strm) {
             break;
         }
     }
+
+    streams.pop_back();
 }
 
 VM::VM() : wp(0), state(VM::State::NO_ERROR) {
