@@ -146,13 +146,18 @@ VM::loadStream(IStream::Ptr strm) {
 
         case IStream::Mode::COMPILE:
             if( isInt(tok) ) {
-                words.push_back(0);
-                words.push_back(toInt32(tok));
+                emit(0);
+                emit(Value(toInt32(tok)).u32);
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
                     state = State::WORD_NOT_FOUND;
                 } else {
-                    runCall(nameToWord[tok]);
+                    uint32_t    word    = nameToWord[tok];
+                    if( functions[word].isImmediate ) {
+                        runCall(word);
+                    } else {
+                        emit(word);
+                    }
                 }
             }
             break;
@@ -179,6 +184,7 @@ VM::initPrimitives() {
 
     Primitive primitives[] = {
         { "lit.i32"     , fetchInt32        , false },
+        { "return"      , returnWord        , false },
         { "word-address", fetchWordAddress  , false },
         { ":"           , defineWord        , false },
         { "immediate"   , immediate         , true  },
@@ -206,6 +212,12 @@ VM::fetchInt32(VM* vm) {
     int32_t    u   = vm->fetch();
     VM::Value   v(u);
     vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::returnWord(VM* vm) {
+    vm->setRet();
     return VM::State::NO_ERROR;
 }
 
@@ -245,6 +257,8 @@ VM::defineWord(VM* vm) {
         vm->functions.push_back(func);
 
         vm->nameToWord[name]    = wordId;
+        
+        vm->stream()->setMode(IStream::Mode::COMPILE);
 
         return VM::State::NO_ERROR;
     }
@@ -347,6 +361,7 @@ VM::codeHere(VM* vm) {
 VM::State
 VM::setEvalMode(VM* vm) {
     vm->stream()->setMode(IStream::Mode::EVAL);
+    vm->emit(1);
     return VM::State::NO_ERROR;
 }
 

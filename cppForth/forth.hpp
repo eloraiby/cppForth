@@ -49,10 +49,12 @@ struct VM {
     };
 
     union Value {
+        uint32_t            u32;
         int32_t             i32;
         float               f32;
         void*               ptr;
-
+        
+        explicit Value(uint32_t v)  : u32(v) {}
         explicit Value(int32_t v)   : i32(v) {}
         explicit Value(float v)     : f32(v) {}
         explicit Value(void* v)     : ptr(v) {}
@@ -110,6 +112,7 @@ private:
 
     // primitives
     static State    fetchInt32(VM* vm);
+    static State    returnWord(VM* vm);
     static State    fetchWordAddress(VM* vm);
     static State    printInt32(VM* vm);
     static State    defineWord(VM* vm);
