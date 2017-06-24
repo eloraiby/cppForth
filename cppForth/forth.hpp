@@ -63,6 +63,9 @@ struct VM {
     typedef State   (*NativeFunction)(VM* vm);
 
     struct Function {
+#ifdef _DEBUG
+        std::string         name;
+#endif
         bool                isImmediate;
         NativeFunction      native;
         int32_t             start;
@@ -94,11 +97,11 @@ struct VM {
     VM();
 
 private:
-    inline void     setCall(uint32_t word)      { returnStack.push_back(++wp); wp = functions[word].start; }
+    inline void     setCall(uint32_t word)      { returnStack.push_back(wp); wp = functions[word].start; }
     inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); }
     inline void     setBranch(uint32_t addr)    { wp = addr; }
 
-    uint32_t        fetch()                     { return words[wp++]; }
+    uint32_t        fetch()                     { ++wp; return words[wp]; }
     
     inline IStream::Ptr     stream() const      { return streams.back(); }
     inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
@@ -125,8 +128,8 @@ private:
     static State    branch(VM* vm);
     static State    dup(VM* vm);
     static State    drop(VM* vm);
-    static State    codeHere(VM* vm);
-    static State    setEvalMode(VM* vm);
+    static State    codeSize(VM* vm);
+    static State    endWord(VM* vm);
 
 
     std::vector<Function>                       functions;

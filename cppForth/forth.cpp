@@ -19,6 +19,9 @@ uint32_t
 VM::addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate) {
     uint32_t    wordId  = static_cast<uint32_t>(functions.size());
     Function    func;
+#ifdef _DEBUG
+    func.name   = name;
+#endif
     func.start  = -1;
     func.native = native;
     func.isImmediate    = isImmediate;
@@ -85,10 +88,14 @@ VM::step() {
             return;
         }
 
+#ifdef _DEBUG
+        std::cout << "-- " << functions[word].name << std::endl;
+#endif
         if( functions[word].native ) {
             state = functions[word].native(this);
+            ++wp;
         } else {
-            if(  functions[word].start == 0 ) {
+            if(  functions[word].start == -1 ) {
                 state = State::WORD_NOT_DEFINED;
                 return;
             } else {
@@ -197,8 +204,8 @@ VM::initPrimitives() {
         { "branch"      , branch            , false },
         { "dup"         , dup               , false },
         { "drop"        , drop              , false },
-        { "code-here"   , codeHere          , true  },
-        { ";"           , setEvalMode       , true  },
+        { "code.size"   , codeSize          , true  },
+        { ";"           , endWord           , true  },
     };
 
     for(Primitive p : primitives) {
@@ -253,6 +260,9 @@ VM::defineWord(VM* vm) {
         uint32_t    wordId  = static_cast<uint32_t>(vm->functions.size());
 
         Function    func;
+#ifdef _DEBUG
+        func.name   = name;
+#endif
         func.start  = vm->words.size();
         vm->functions.push_back(func);
 
@@ -351,7 +361,7 @@ VM::drop(VM* vm) {
 }
 
 VM::State
-VM::codeHere(VM* vm) {
+VM::codeSize(VM* vm) {
     Value v(static_cast<int32_t>(vm->words.size()));
     vm->push(v);
 
@@ -359,7 +369,7 @@ VM::codeHere(VM* vm) {
 }
 
 VM::State
-VM::setEvalMode(VM* vm) {
+VM::endWord(VM* vm) {
     vm->stream()->setMode(IStream::Mode::EVAL);
     vm->emit(1);
     return VM::State::NO_ERROR;
