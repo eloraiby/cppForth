@@ -53,7 +53,7 @@ VM::toInt32(const std::string& tok) {
     uint32_t    val = 0;
     
     while( pos < tok.size() ) {
-        val += val * 10 + tok[pos];
+        val = val * 10 + (tok[pos] - '0');
         ++pos;
     }
 
@@ -192,6 +192,7 @@ VM::initPrimitives() {
         { "dup"         , dup               , false },
         { "drop"        , drop              , false },
         { "code-here"   , codeHere          , true  },
+        { ";"           , setEvalMode       , true  },
     };
 
     for(Primitive p : primitives) {
@@ -340,6 +341,12 @@ VM::codeHere(VM* vm) {
     Value v(static_cast<int32_t>(vm->words.size()));
     vm->push(v);
 
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::setEvalMode(VM* vm) {
+    vm->stream()->setMode(IStream::Mode::EVAL);
     return VM::State::NO_ERROR;
 }
 

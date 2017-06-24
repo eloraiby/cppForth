@@ -123,6 +123,7 @@ private:
     static State    dup(VM* vm);
     static State    drop(VM* vm);
     static State    codeHere(VM* vm);
+    static State    setEvalMode(VM* vm);
 
 
     std::vector<Function>                       functions;
