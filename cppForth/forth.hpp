@@ -89,6 +89,8 @@ struct VM {
 
     uint32_t        addNativeFunction(const std::string& name, NativeFunction native);
 
+    VM();
+
 private:
     inline void     setCall(uint32_t word)      { returnStack.push_back(++wp); wp = functions[word].start; }
     inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); }
