@@ -14,11 +14,13 @@ struct StdStream : public Forth::IStream {
 
     virtual uint32_t
     peekChar() override {
+        testAndFillBuffer();
         return buff[pos];
     }
 
     virtual uint32_t
     getChar() override {
+        testAndFillBuffer();
         return buff[pos++];
     }
     
@@ -46,9 +48,9 @@ struct StdStream : public Forth::IStream {
 int
 main(int argc, char* argv) {
     Forth::IStream::Ptr strm(new StdStream());
+    Forth::VM*  vm  = new Forth::VM();
 
-    while(1) {
-        std::cout << static_cast<char>(strm->getChar());
-    }
+    vm->loadStream(strm);
+
     return 0;
 }
