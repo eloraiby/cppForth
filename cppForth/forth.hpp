@@ -71,22 +71,13 @@ struct VM {
     int32_t         findWord(const std::string& name);
     void            loadStream(IStream::Ptr stream);
 
-    inline void     setCall(uint32_t word)      { returnStack.push_back(++wp); wp = functions[word].start; }
-    inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); }
-    inline void     setBranch(uint32_t addr)    { wp = addr; }
 
     inline uint32_t wordAddr(uint32_t word)     { functions[word].start; }
-
-    uint32_t        fetch()                     { return words[wp++]; }
 
     inline void     push(Value v)               { valueStack.push_back(v); }
     inline Value    top() const                 { return valueStack.back(); }
     inline void     pop()                       { valueStack.pop_back(); }
 
-    inline IStream::Ptr     stream() const      { return streams.back(); }
-    inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
-    inline void     popStream()                 { streams.pop_back(); }
-    
     std::string     getToken();
     void            step();
     void            runCall(uint32_t word);
@@ -99,14 +90,34 @@ struct VM {
     uint32_t        addNativeFunction(const std::string& name, NativeFunction native);
 
 private:
+    inline void     setCall(uint32_t word)      { returnStack.push_back(++wp); wp = functions[word].start; }
+    inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); }
+    inline void     setBranch(uint32_t addr)    { wp = addr; }
+
+    uint32_t        fetch()                     { return words[wp++]; }
+    
+    inline IStream::Ptr     stream() const      { return streams.back(); }
+    inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
+    inline void     popStream()                 { streams.pop_back(); }
+    
+
     void            initPrimitives();
 
     static bool     isInt(const std::string& tok);
     static int32_t  toInt32(const std::string& tok);
 
     // primitives
-    static State    loadInt32(VM* vm);
+    static State    fetchInt32(VM* vm);
+    static State    fetchWordAddress(VM* vm);
+    static State    printInt32(VM* vm);
     static State    defineWord(VM* vm);
+    static State    immediate(VM* vm);
+    static State    addInt32(VM* vm);
+    static State    subInt32(VM* vm);
+    static State    mulInt32(VM* vm);
+    static State    divInt32(VM* vm);
+    static State    modInt32(VM* vm);
+
 
     std::vector<Function>                       functions;
     std::unordered_map<std::string, uint32_t>   nameToWord;

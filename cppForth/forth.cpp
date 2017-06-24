@@ -3,25 +3,8 @@
 #include <iostream>
 
 namespace Forth {
+
 IStream::~IStream() {}
-
-VM::State
-VM::defineWord(VM* vm) {
-    uint32_t    wordId  = static_cast<uint32_t>(vm->functions.size());
-
-    std::string name    = vm->getToken();
-
-    if( VM::isInt(name) ) {
-        return VM::State::INT_IS_NO_WORD;
-    } else {
-        Function    func;
-        func.start  = vm->words.size();
-
-
-
-        return VM::State::NO_ERROR;
-    }
-}
 
 int32_t
 VM::findWord(const std::string& name) {
@@ -43,23 +26,7 @@ VM::addNativeFunction(const std::string& name, NativeFunction native) {
     return wordId;
 }
 
-////////////////////////////////////////////////////////////////////////////////
-// primitives
-////////////////////////////////////////////////////////////////////////////////
-VM::State
-fetchI32(VM* vm) {
-    int32_t    u   = vm->fetch();
-    VM::Value   v(u);
-    return VM::State::NO_ERROR;
-}
 
-VM::State
-dot(VM* vm) {
-    VM::Value   v   = vm->top();
-    vm->pop();
-    std::cout << v.i32 << std::endl;
-    return VM::State::NO_ERROR;
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 // parsing & runtime
@@ -156,11 +123,6 @@ VM::runCall(uint32_t word) {
 }
 
 void
-VM::initPrimitives() {
-
-}
-
-void
 VM::loadStream(IStream::Ptr strm) {
     while( stream()->peekChar() && state == State::NO_ERROR ) {
         std::string tok = getToken();
@@ -195,4 +157,137 @@ VM::loadStream(IStream::Ptr strm) {
     }
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// primitives
+////////////////////////////////////////////////////////////////////////////////
+void
+VM::initPrimitives() {
+    struct Primitive {
+        const char*     name;
+        NativeFunction  native;
+    };
+
+    Primitive primitives[] = {
+        { "lit.i32"     , fetchInt32        },
+        { "word-address", fetchWordAddress  },
+        { ":"           , defineWord        },
+        { "immediate"   , immediate         },
+        { "."           , printInt32        },
+        { "+"           , addInt32          },
+        { "-"           , subInt32          },
+        { "*"           , mulInt32          },
+        { "/"           , divInt32          },
+        { "%"           , modInt32          },
+    };
+
+    for(Primitive p : primitives) {
+        addNativeFunction(p.name, p.native);
+    }
+}
+
+
+VM::State
+VM::fetchInt32(VM* vm) {
+    int32_t    u   = vm->fetch();
+    VM::Value   v(u);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::fetchWordAddress(VM* vm) {
+    int32_t    u   = vm->fetch();
+    VM::Value v(vm->functions[u].start);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::printInt32(VM* vm) {
+    VM::Value   v   = vm->top();
+    vm->pop();
+    std::cout << v.i32 << std::endl;
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::defineWord(VM* vm) {
+
+    std::string name    = vm->getToken();
+
+    if( VM::isInt(name) ) {
+        return VM::State::INT_IS_NO_WORD;
+    } else {
+        //
+        // TODO:    do we want to allow forward declaration ?
+        //          In this case, we should test to see if the functions[nameToWord[name]].start == -1 && .native == nullptr
+        //          before setting the the old function to a value
+        //
+        uint32_t    wordId  = static_cast<uint32_t>(vm->functions.size());
+
+        Function    func;
+        func.start  = vm->words.size();
+        vm->functions.push_back(func);
+
+        vm->nameToWord[name]    = wordId;
+
+        return VM::State::NO_ERROR;
+    }
+}
+
+VM::State
+VM::immediate(VM* vm) {
+    vm->functions[vm->functions.size() - 1].isImmediate = true;
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::addInt32(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 + b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::subInt32(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 - b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::mulInt32(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 * b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::divInt32(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 / b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::modInt32(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 % b.i32));
+    return VM::State::NO_ERROR;
+}
 }
