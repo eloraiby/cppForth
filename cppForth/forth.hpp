@@ -87,7 +87,7 @@ struct VM {
     inline void     setState(State s)           { state = s; }
     inline State    getState() const            { return state; }
 
-    uint32_t        addNativeFunction(const std::string& name, NativeFunction native);
+    uint32_t        addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate);
 
     VM();
 
@@ -119,6 +119,10 @@ private:
     static State    mulInt32(VM* vm);
     static State    divInt32(VM* vm);
     static State    modInt32(VM* vm);
+    static State    branch(VM* vm);
+    static State    dup(VM* vm);
+    static State    drop(VM* vm);
+    static State    codeHere(VM* vm);
 
 
     std::vector<Function>                       functions;

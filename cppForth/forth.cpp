@@ -16,11 +16,12 @@ VM::findWord(const std::string& name) {
 }
 
 uint32_t
-VM::addNativeFunction(const std::string& name, NativeFunction native) {
+VM::addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate) {
     uint32_t    wordId  = static_cast<uint32_t>(functions.size());
     Function    func;
     func.start  = -1;
     func.native = native;
+    func.isImmediate    = isImmediate;
     functions.push_back(func);
     nameToWord[name]    = wordId;
     return wordId;
@@ -169,23 +170,28 @@ VM::initPrimitives() {
     struct Primitive {
         const char*     name;
         NativeFunction  native;
+        bool            isImmediate;
     };
 
     Primitive primitives[] = {
-        { "lit.i32"     , fetchInt32        },
-        { "word-address", fetchWordAddress  },
-        { ":"           , defineWord        },
-        { "immediate"   , immediate         },
-        { "."           , printInt32        },
-        { "+"           , addInt32          },
-        { "-"           , subInt32          },
-        { "*"           , mulInt32          },
-        { "/"           , divInt32          },
-        { "%"           , modInt32          },
+        { "lit.i32"     , fetchInt32        , false },
+        { "word-address", fetchWordAddress  , false },
+        { ":"           , defineWord        , false },
+        { "immediate"   , immediate         , true  },
+        { "."           , printInt32        , false },
+        { "+"           , addInt32          , false },
+        { "-"           , subInt32          , false },
+        { "*"           , mulInt32          , false },
+        { "/"           , divInt32          , false },
+        { "%"           , modInt32          , false },
+        { "branch"      , branch            , false },
+        { "dup"         , dup               , false },
+        { "drop"        , drop              , false },
+        { "code-here"   , codeHere          , true  },
     };
 
     for(Primitive p : primitives) {
-        addNativeFunction(p.name, p.native);
+        addNativeFunction(p.name, p.native, p.isImmediate);
     }
 }
 
@@ -294,4 +300,43 @@ VM::modInt32(VM* vm) {
     vm->push(VM::Value(a.i32 % b.i32));
     return VM::State::NO_ERROR;
 }
+
+VM::State
+VM::branch(VM* vm) {
+    VM::Value cond  = vm->top();
+    vm->pop();
+
+    VM::Value addr  = vm->top();
+    vm->pop();
+
+    if( cond.i32 != 0 ) {
+        vm->setBranch(addr.i32);
+    }
+
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::dup(VM* vm) {
+    VM::Value val  = vm->top();
+    vm->push(val);
+
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::drop(VM* vm) {
+    vm->pop();
+
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::codeHere(VM* vm) {
+    Value v(static_cast<int32_t>(vm->words.size()));
+    vm->push(v);
+
+    return VM::State::NO_ERROR;
+}
+
 }
