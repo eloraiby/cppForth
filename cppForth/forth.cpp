@@ -1,3 +1,18 @@
+/* 
+** Copyright (c) 2017 Wael El Oraiby.
+** 
+** This program is free software: you can redistribute it and/or modify  
+** it under the terms of the GNU Lesser General Public License as   
+** published by the Free Software Foundation, version 3.
+**
+** This program is distributed in the hope that it will be useful, but 
+** WITHOUT ANY WARRANTY; without even the implied warranty of 
+** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+** Lesser General Lesser Public License for more details.
+**
+** You should have received a copy of the GNU Lesser General Public License
+** along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 #include "forth.hpp"
 
 #include <iostream>
@@ -207,6 +222,8 @@ VM::initPrimitives() {
         { "code.size"   , codeSize          , false },
         { ";"           , endWord           , true  },
         { "emit"        , emitWord          , false },
+        { "stream.peek" , streamPeek        , false },
+        { "stream.getch", streamGetCH       , false },
     };
 
     for(Primitive p : primitives) {
@@ -391,12 +408,34 @@ VM::emitWord(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
 
-    if( v.i32 < 0 || v.i32 >= vm->functions.size() ) {
+    if( v.i32 < 0 || v.u32 >= vm->functions.size() ) {
         return VM::State::WORD_NOT_FOUND;
     } else {
-        vm->emit(static_cast<uint32_t>(v.i32));
+        vm->emit(v.u32);
         return VM::State::NO_ERROR;
     }
+}
+
+VM::State
+VM::streamPeek(VM* vm) {
+    // TODO: handle stream error (does not exist)
+    Value v(static_cast<uint32_t>(vm->stream()->peekChar()));
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::streamGetCH(VM* vm) {
+    // TODO: handle stream error (does not exist)
+    Value v(static_cast<uint32_t>(vm->stream()->getChar()));
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::streamToken(VM* vm) {
+    // TODO: when strings are ready
+    return VM::State::NO_ERROR;
 }
 
 }
