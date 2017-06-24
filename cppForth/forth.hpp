@@ -114,22 +114,23 @@ private:
     static int32_t  toInt32(const std::string& tok);
 
     // primitives
-    static State    fetchInt32(VM* vm);
-    static State    returnWord(VM* vm);
-    static State    fetchWordAddress(VM* vm);
-    static State    printInt32(VM* vm);
-    static State    defineWord(VM* vm);
-    static State    immediate(VM* vm);
-    static State    addInt32(VM* vm);
-    static State    subInt32(VM* vm);
-    static State    mulInt32(VM* vm);
-    static State    divInt32(VM* vm);
-    static State    modInt32(VM* vm);
-    static State    branch(VM* vm);
-    static State    dup(VM* vm);
-    static State    drop(VM* vm);
-    static State    codeSize(VM* vm);
-    static State    endWord(VM* vm);
+    static State    fetchInt32  (VM* vm);
+    static State    returnWord  (VM* vm);
+    static State    wordId      (VM* vm);
+    static State    printInt32  (VM* vm);
+    static State    defineWord  (VM* vm);
+    static State    immediate   (VM* vm);
+    static State    addInt32    (VM* vm);
+    static State    subInt32    (VM* vm);
+    static State    mulInt32    (VM* vm);
+    static State    divInt32    (VM* vm);
+    static State    modInt32    (VM* vm);
+    static State    branch      (VM* vm);
+    static State    dup         (VM* vm);
+    static State    drop        (VM* vm);
+    static State    codeSize    (VM* vm);
+    static State    endWord     (VM* vm);
+    static State    emitWord    (VM* vm);
 
 
     std::vector<Function>                       functions;

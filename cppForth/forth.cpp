@@ -192,7 +192,7 @@ VM::initPrimitives() {
     Primitive primitives[] = {
         { "lit.i32"     , fetchInt32        , false },
         { "return"      , returnWord        , false },
-        { "word-address", fetchWordAddress  , false },
+        { "word.id"     , wordId            , true  },
         { ":"           , defineWord        , false },
         { "immediate"   , immediate         , true  },
         { "."           , printInt32        , false },
@@ -204,8 +204,9 @@ VM::initPrimitives() {
         { "branch"      , branch            , false },
         { "dup"         , dup               , false },
         { "drop"        , drop              , false },
-        { "code.size"   , codeSize          , true  },
+        { "code.size"   , codeSize          , false },
         { ";"           , endWord           , true  },
+        { "emit"        , emitWord          , false },
     };
 
     for(Primitive p : primitives) {
@@ -229,10 +230,20 @@ VM::returnWord(VM* vm) {
 }
 
 VM::State
-VM::fetchWordAddress(VM* vm) {
-    int32_t    u   = vm->fetch();
-    VM::Value v(vm->functions[u].start);
-    vm->push(v);
+VM::wordId(VM* vm) {
+    std::string name    = vm->getToken();
+    
+    if( vm->isInt(name) ) {
+        return VM::State::INT_IS_NO_WORD;
+    }
+
+    if( vm->nameToWord.find(name) == vm->nameToWord.end() ) {
+        return VM::State::WORD_NOT_FOUND;
+    }
+    
+    uint32_t    wordId = vm->nameToWord[name];
+    vm->emit(0);
+    vm->emit(wordId);
     return VM::State::NO_ERROR;
 }
 
@@ -373,6 +384,19 @@ VM::endWord(VM* vm) {
     vm->stream()->setMode(IStream::Mode::EVAL);
     vm->emit(1);
     return VM::State::NO_ERROR;
+}
+
+VM::State
+VM::emitWord(VM* vm) {
+    VM::Value v   = vm->top();
+    vm->pop();
+
+    if( v.i32 < 0 || v.i32 >= vm->functions.size() ) {
+        return VM::State::WORD_NOT_FOUND;
+    } else {
+        vm->emit(static_cast<uint32_t>(v.i32));
+        return VM::State::NO_ERROR;
+    }
 }
 
 }
