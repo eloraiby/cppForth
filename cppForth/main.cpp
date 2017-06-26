@@ -106,7 +106,11 @@ const char
 core[] =
     ": *2 2 * ;\n" \
     ": /2 2 / ;\n" \
-    ": here code.size 1 - ; immediate\n"
+    ": 1+ 1 + ;\n" \
+    ": 1- 1 - ;\n" \
+    ": here code.size 1 - ; immediate\n" \
+    ": repeat here ; immediate\n" \
+    ": until word.id ?branch emit emit ; immediate\n"
     ;
 
 int

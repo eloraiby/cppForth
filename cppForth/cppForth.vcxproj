@@ -141,6 +141,7 @@
   <ItemGroup>
     <ClCompile Include="forth.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="primitives.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="forth.hpp" />

@@ -205,25 +205,26 @@ VM::initPrimitives() {
     };
 
     Primitive primitives[] = {
-        { "lit.i32"     , fetchInt32        , false },
-        { "return"      , returnWord        , false },
-        { "word.id"     , wordId            , true  },
-        { ":"           , defineWord        , false },
-        { "immediate"   , immediate         , true  },
-        { "."           , printInt32        , false },
-        { "+"           , addInt32          , false },
-        { "-"           , subInt32          , false },
-        { "*"           , mulInt32          , false },
-        { "/"           , divInt32          , false },
-        { "%"           , modInt32          , false },
-        { "branch"      , branch            , false },
-        { "dup"         , dup               , false },
-        { "drop"        , drop              , false },
-        { "code.size"   , codeSize          , false },
-        { ";"           , endWord           , true  },
-        { "emit"        , emitWord          , false },
-        { "stream.peek" , streamPeek        , false },
-        { "stream.getch", streamGetCH       , false },
+        { "lit.i32"     , Primitives::fetchInt32    , false },
+        { "return"      , Primitives::returnWord    , false },
+        { "word.id"     , Primitives::wordId        , true  },
+        { ":"           , Primitives::defineWord    , false },
+        { "immediate"   , Primitives::immediate     , true  },
+        { "."           , Primitives::printInt32    , false },
+        { "+"           , Primitives::addInt32      , false },
+        { "-"           , Primitives::subInt32      , false },
+        { "*"           , Primitives::mulInt32      , false },
+        { "/"           , Primitives::divInt32      , false },
+        { "%"           , Primitives::modInt32      , false },
+        { "branch"      , Primitives::branch        , false },
+        { "?branch"     , Primitives::branchIf      , false },
+        { "dup"         , Primitives::dup           , false },
+        { "drop"        , Primitives::drop          , false },
+        { "code.size"   , Primitives::codeSize      , false },
+        { ";"           , Primitives::endWord       , true  },
+        { "emit"        , Primitives::emitWord      , false },
+        { "stream.peek" , Primitives::streamPeek    , false },
+        { "stream.getch", Primitives::streamGetCH   , false },
     };
 
     for(Primitive p : primitives) {
@@ -232,210 +233,5 @@ VM::initPrimitives() {
 }
 
 
-VM::State
-VM::fetchInt32(VM* vm) {
-    int32_t    u   = vm->fetch();
-    VM::Value   v(u);
-    vm->push(v);
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::returnWord(VM* vm) {
-    vm->setRet();
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::wordId(VM* vm) {
-    std::string name    = vm->getToken();
-    
-    if( vm->isInt(name) ) {
-        return VM::State::INT_IS_NO_WORD;
-    }
-
-    if( vm->nameToWord.find(name) == vm->nameToWord.end() ) {
-        return VM::State::WORD_NOT_FOUND;
-    }
-    
-    uint32_t    wordId = vm->nameToWord[name];
-    vm->emit(0);
-    vm->emit(wordId);
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::printInt32(VM* vm) {
-    VM::Value   v   = vm->top();
-    vm->pop();
-    std::cout << v.i32 << std::endl;
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::defineWord(VM* vm) {
-
-    std::string name    = vm->getToken();
-
-    if( VM::isInt(name) ) {
-        return VM::State::INT_IS_NO_WORD;
-    } else {
-        //
-        // TODO:    do we want to allow forward declaration ?
-        //          In this case, we should test to see if the functions[nameToWord[name]].start == -1 && .native == nullptr
-        //          before setting the the old function to a value
-        //
-        uint32_t    wordId  = static_cast<uint32_t>(vm->functions.size());
-
-        Function    func;
-#ifdef _DEBUG
-        func.name   = name;
-#endif
-        func.start  = vm->words.size();
-        vm->functions.push_back(func);
-
-        vm->nameToWord[name]    = wordId;
-        
-        vm->stream()->setMode(IStream::Mode::COMPILE);
-
-        return VM::State::NO_ERROR;
-    }
-}
-
-VM::State
-VM::immediate(VM* vm) {
-    vm->functions[vm->functions.size() - 1].isImmediate = true;
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::addInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
-    vm->push(VM::Value(a.i32 + b.i32));
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::subInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
-    vm->push(VM::Value(a.i32 - b.i32));
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::mulInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
-    vm->push(VM::Value(a.i32 * b.i32));
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::divInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
-    vm->push(VM::Value(a.i32 / b.i32));
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::modInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
-    vm->push(VM::Value(a.i32 % b.i32));
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::branch(VM* vm) {
-    VM::Value cond  = vm->top();
-    vm->pop();
-
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    if( cond.i32 != 0 ) {
-        vm->setBranch(addr.i32);
-    }
-
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::dup(VM* vm) {
-    VM::Value val  = vm->top();
-    vm->push(val);
-
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::drop(VM* vm) {
-    vm->pop();
-
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::codeSize(VM* vm) {
-    Value v(static_cast<int32_t>(vm->words.size()));
-    vm->push(v);
-
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::endWord(VM* vm) {
-    vm->stream()->setMode(IStream::Mode::EVAL);
-    vm->emit(1);
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::emitWord(VM* vm) {
-    VM::Value v   = vm->top();
-    vm->pop();
-
-    if( v.i32 < 0 || v.u32 >= vm->functions.size() ) {
-        return VM::State::WORD_NOT_FOUND;
-    } else {
-        vm->emit(v.u32);
-        return VM::State::NO_ERROR;
-    }
-}
-
-VM::State
-VM::streamPeek(VM* vm) {
-    // TODO: handle stream error (does not exist)
-    Value v(static_cast<uint32_t>(vm->stream()->peekChar()));
-    vm->push(v);
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::streamGetCH(VM* vm) {
-    // TODO: handle stream error (does not exist)
-    Value v(static_cast<uint32_t>(vm->stream()->getChar()));
-    vm->push(v);
-    return VM::State::NO_ERROR;
-}
-
-VM::State
-VM::streamToken(VM* vm) {
-    // TODO: when strings are ready
-    return VM::State::NO_ERROR;
-}
 
 }

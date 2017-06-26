@@ -121,36 +121,11 @@ private:
     inline IStream::Ptr     stream() const      { return streams.back(); }
     inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
     inline void     popStream()                 { streams.pop_back(); }
-    
 
     void            initPrimitives();
 
     static bool     isInt(const std::string& tok);
     static int32_t  toInt32(const std::string& tok);
-
-    // primitives
-    static State    fetchInt32  (VM* vm);
-    static State    returnWord  (VM* vm);
-    static State    wordId      (VM* vm);
-    static State    printInt32  (VM* vm);
-    static State    defineWord  (VM* vm);
-    static State    immediate   (VM* vm);
-    static State    addInt32    (VM* vm);
-    static State    subInt32    (VM* vm);
-    static State    mulInt32    (VM* vm);
-    static State    divInt32    (VM* vm);
-    static State    modInt32    (VM* vm);
-    static State    branch      (VM* vm);
-    static State    dup         (VM* vm);
-    static State    drop        (VM* vm);
-    static State    codeSize    (VM* vm);
-    static State    endWord     (VM* vm);
-    static State    emitWord    (VM* vm);
-    static State    streamPeek  (VM* vm);
-    static State    streamGetCH (VM* vm);
-    static State    streamToken (VM* vm);
-
-
 
     std::vector<Function>                       functions;
     std::unordered_map<std::string, uint32_t>   nameToWord;
@@ -164,8 +139,40 @@ private:
 
     uint32_t                                    wp;     // instruction pointer
     State                                       state;
+
+    friend struct   Primitives;
 };
 
+struct Primitives {
+    // primitives
+    static VM::State    fetchInt32  (VM* vm);
+    static VM::State    returnWord  (VM* vm);
+    static VM::State    wordId      (VM* vm);
+    static VM::State    printInt32  (VM* vm);
+    static VM::State    defineWord  (VM* vm);
+    static VM::State    immediate   (VM* vm);
+    static VM::State    addInt32    (VM* vm);
+    static VM::State    subInt32    (VM* vm);
+    static VM::State    mulInt32    (VM* vm);
+    static VM::State    divInt32    (VM* vm);
+    static VM::State    modInt32    (VM* vm);
+    static VM::State    branch      (VM* vm);
+    static VM::State    branchIf    (VM* vm);
+    static VM::State    dup         (VM* vm);
+    static VM::State    drop        (VM* vm);
+    static VM::State    codeSize    (VM* vm);
+    static VM::State    endWord     (VM* vm);
+    static VM::State    emitWord    (VM* vm);
+    static VM::State    streamPeek  (VM* vm);
+    static VM::State    streamGetCH (VM* vm);
+    static VM::State    streamToken (VM* vm);
+    static VM::State    ieq         (VM* vm);
+    static VM::State    ineq        (VM* vm);
+    static VM::State    igt         (VM* vm);
+    static VM::State    ilt         (VM* vm);
+    static VM::State    igeq        (VM* vm);
+    static VM::State    ileq        (VM* vm);
+};
 }
 
 #endif  // __FORTH__HPP__
