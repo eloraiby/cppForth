@@ -236,4 +236,64 @@ Primitives::streamToken(VM* vm) {
     return VM::State::NO_ERROR;
 }
 
+VM::State
+Primitives::ieq(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 == b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::ineq(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 != b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::igt(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 > b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::ilt(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 < b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::igeq(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 >= b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::ileq(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.i32 <= b.i32));
+    return VM::State::NO_ERROR;
+}
+
 }   // namespace forth

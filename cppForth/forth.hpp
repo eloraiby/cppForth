@@ -24,6 +24,8 @@
 #include <cfloat>
 #include <cstdint>
 
+#define _DEBUG
+
 namespace Forth {
 
 struct IStream {
@@ -92,7 +94,7 @@ struct VM {
     void            loadStream(IStream::Ptr stream);
 
 
-    inline uint32_t wordAddr(uint32_t word)     { functions[word].start; }
+    inline uint32_t wordAddr(uint32_t word)     { return functions[word].start; }
 
     inline void     push(Value v)               { valueStack.push_back(v); }
     inline Value    top() const                 { return valueStack.back(); }

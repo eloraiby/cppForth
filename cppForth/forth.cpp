@@ -55,7 +55,7 @@ VM::isInt(const std::string& tok) {
     uint32_t    pos = 0;
     
     while( pos < tok.size() ) {
-        if( tok[pos] <= '0' || tok[pos] >= '9' ) {
+        if( tok[pos] < '0' || tok[pos] > '9' ) {
             return false;
         }
 
@@ -104,7 +104,11 @@ VM::step() {
         }
 
 #ifdef _DEBUG
-        std::cout << "-- " << functions[word].name << std::endl;
+        std::cout << "@" << wp << " -- " << functions[word].name;
+        if( word == 0 ) {
+            std::cout << " " << words[wp + 1];
+        }
+        std::cout << std::endl;
 #endif
         if( functions[word].native ) {
             state = functions[word].native(this);
@@ -225,6 +229,13 @@ VM::initPrimitives() {
         { "emit"        , Primitives::emitWord      , false },
         { "stream.peek" , Primitives::streamPeek    , false },
         { "stream.getch", Primitives::streamGetCH   , false },
+        { "=="          , Primitives::ieq           , false },
+        { "=/="         , Primitives::ineq          , false },
+        { ">"           , Primitives::igt           , false },
+        { "<"           , Primitives::ilt           , false },
+        { ">="          , Primitives::igeq          , false },
+        { "<="          , Primitives::ileq          , false },
+
     };
 
     for(Primitive p : primitives) {

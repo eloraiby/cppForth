@@ -110,11 +110,12 @@ core[] =
     ": 1- 1 - ;\n" \
     ": here code.size 1 - ; immediate\n" \
     ": repeat here ; immediate\n" \
-    ": until word.id ?branch emit emit ; immediate\n"
+    ": until 0 emit emit word.id ?branch emit ; immediate\n" \
+    ": ( repeat stream.getch 41 == until ; immediate\n"
     ;
 
 int
-main(int argc, char* argv) {
+main(int argc, char* argv[]) {
     Forth::VM*  vm  = new Forth::VM();
 
     Forth::IStream::Ptr coreStream(new StringStream(core));
