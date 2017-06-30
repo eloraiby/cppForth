@@ -311,11 +311,89 @@ Primitives::ileq(VM* vm) {
 }
 
 VM::State
-Primitives::pick(VM *vm) {
+Primitives::vsPtr(VM *vm) {
+    VM::Value v(static_cast<int32_t>(vm->valueStack.size()) - 1);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::rsPtr(VM *vm) {
+    VM::Value v(static_cast<int32_t>(vm->returnStack.size()) - 1);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::wsPtr(VM *vm) {
+    VM::Value v(static_cast<int32_t>(vm->words.size()) - 1);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::vsFetch(VM *vm) {
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    VM::Value v = vm->valueStack[addr.i32];
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::rsFetch(VM *vm) {
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    VM::Value v(static_cast<int32_t>(vm->returnStack[addr.i32]));
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::wsFetch(VM *vm) {
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    VM::Value v(static_cast<int32_t>(vm->words[addr.i32]));
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::vsStore(VM *vm) {
     VM::Value addr  = vm->top();
     vm->pop();
-    VM::Value v     = vm->valueStack[vm->valueStack.size() - addr.i32 - 1];
-    vm->push(v);
+
+    VM::Value v     = vm->top();
+    vm->pop();
+
+    vm->valueStack[addr.i32] = v;
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::rsStore(VM *vm) {
+    VM::Value addr  = vm->top();
+    vm->pop();
+
+    VM::Value v     = vm->top();
+    vm->pop();
+
+    vm->returnStack[addr.i32] = v.u32;
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::wsStore(VM *vm) {
+    VM::Value addr  = vm->top();
+    vm->pop();
+
+    VM::Value v     = vm->top();
+    vm->pop();
+
+    vm->words[addr.i32] = v.u32;
     return VM::State::NO_ERROR;
 }
 

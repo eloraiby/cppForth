@@ -211,7 +211,7 @@ VM::initPrimitives() {
     Primitive primitives[] = {
         { "lit.i32"     , Primitives::fetchInt32    , false },
         { "return"      , Primitives::returnWord    , false },
-        { "word.id"     , Primitives::wordId        , true  },
+        { "'"           , Primitives::wordId        , true  },
         { ":"           , Primitives::defineWord    , false },
         { "immediate"   , Primitives::immediate     , true  },
         { "."           , Primitives::printInt32    , false },
@@ -227,7 +227,7 @@ VM::initPrimitives() {
         { "swap"        , Primitives::swap          , false },
         { "code.size"   , Primitives::codeSize      , false },
         { ";"           , Primitives::endWord       , true  },
-        { "emit"        , Primitives::emitWord      , false },
+        { ">ws"         , Primitives::emitWord      , false },
         { "stream.peek" , Primitives::streamPeek    , false },
         { "stream.getch", Primitives::streamGetCH   , false },
         { "=="          , Primitives::ieq           , false },
@@ -236,7 +236,17 @@ VM::initPrimitives() {
         { "<"           , Primitives::ilt           , false },
         { ">="          , Primitives::igeq          , false },
         { "<="          , Primitives::ileq          , false },
-        { "pick"        , Primitives::pick          , false },
+
+        { "vs.p"        , Primitives::vsPtr         , false },
+        { "rs.p"        , Primitives::rsPtr         , false },
+        { "ws.p"        , Primitives::wsPtr         , false },
+        { "@vs"         , Primitives::vsFetch       , false },
+        { "@rs"         , Primitives::rsFetch       , false },
+        { "@ws"         , Primitives::wsFetch       , false },
+        { "!vs"         , Primitives::vsStore       , false },
+        { "!rs"         , Primitives::rsStore       , false },
+        { "!ws"         , Primitives::wsStore       , false },
+
 
         { "exit"        , Primitives::exit          , false },
 

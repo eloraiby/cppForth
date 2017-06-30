@@ -175,7 +175,16 @@ struct Primitives {
     static VM::State    ilt         (VM* vm);
     static VM::State    igeq        (VM* vm);
     static VM::State    ileq        (VM* vm);
-    static VM::State    pick        (VM* vm);
+    static VM::State    vsPtr       (VM* vm);
+    static VM::State    rsPtr       (VM* vm);
+    static VM::State    wsPtr       (VM* vm);
+    static VM::State    vsFetch     (VM* vm);
+    static VM::State    rsFetch     (VM* vm);
+    static VM::State    wsFetch     (VM* vm);
+    static VM::State    vsStore     (VM* vm);
+    static VM::State    rsStore     (VM* vm);
+    static VM::State    wsStore     (VM* vm);
+
 
     static VM::State    exit        (VM* vm);
 
