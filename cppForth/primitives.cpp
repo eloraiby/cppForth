@@ -187,6 +187,20 @@ Primitives::drop(VM* vm) {
 }
 
 VM::State
+Primitives::swap(VM* vm) {
+    VM::Value v0  = vm->top();
+    vm->pop();
+
+    VM::Value v1  = vm->top();
+    vm->pop();
+
+    vm->push(v0);
+    vm->push(v1);
+
+    return VM::State::NO_ERROR;
+}
+
+VM::State
 Primitives::codeSize(VM* vm) {
     VM::Value v(static_cast<int32_t>(vm->words.size()));
     vm->push(v);
@@ -293,6 +307,23 @@ Primitives::ileq(VM* vm) {
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 <= b.i32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::pick(VM *vm) {
+    VM::Value addr  = vm->top();
+    vm->pop();
+    VM::Value v     = vm->valueStack[vm->valueStack.size() - addr.i32 - 1];
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::exit(VM *vm) {
+    VM::Value ret    = vm->top();
+    vm->pop();
+    ::exit(ret.i32);
     return VM::State::NO_ERROR;
 }
 

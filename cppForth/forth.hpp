@@ -24,7 +24,7 @@
 #include <cfloat>
 #include <cstdint>
 
-#define _DEBUG
+//#define _DEBUG
 
 namespace Forth {
 
@@ -162,6 +162,7 @@ struct Primitives {
     static VM::State    branchIf    (VM* vm);
     static VM::State    dup         (VM* vm);
     static VM::State    drop        (VM* vm);
+    static VM::State    swap        (VM* vm);
     static VM::State    codeSize    (VM* vm);
     static VM::State    endWord     (VM* vm);
     static VM::State    emitWord    (VM* vm);
@@ -174,6 +175,9 @@ struct Primitives {
     static VM::State    ilt         (VM* vm);
     static VM::State    igeq        (VM* vm);
     static VM::State    ileq        (VM* vm);
+    static VM::State    pick        (VM* vm);
+
+    static VM::State    exit        (VM* vm);
 };
 }
 

@@ -108,10 +108,10 @@ core[] =
     ": /2 2 / ;\n" \
     ": 1+ 1 + ;\n" \
     ": 1- 1 - ;\n" \
-    ": here code.size 1 - ; immediate\n" \
+    ": here code.size 1 - ;\n" \
     ": repeat here ; immediate\n" \
-    ": until 0 emit emit word.id ?branch emit ; immediate\n" \
-    ": ( repeat stream.getch 41 == until ; immediate\n"
+    ": until word.id lit.i32 emit emit word.id swap emit word.id ?branch emit ; immediate\n" \
+    ": ( repeat stream.getch 41 =/= until ; immediate\n"
     ;
 
 int

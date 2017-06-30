@@ -224,6 +224,7 @@ VM::initPrimitives() {
         { "?branch"     , Primitives::branchIf      , false },
         { "dup"         , Primitives::dup           , false },
         { "drop"        , Primitives::drop          , false },
+        { "swap"        , Primitives::swap          , false },
         { "code.size"   , Primitives::codeSize      , false },
         { ";"           , Primitives::endWord       , true  },
         { "emit"        , Primitives::emitWord      , false },
@@ -235,7 +236,9 @@ VM::initPrimitives() {
         { "<"           , Primitives::ilt           , false },
         { ">="          , Primitives::igeq          , false },
         { "<="          , Primitives::ileq          , false },
+        { "pick"        , Primitives::pick          , false },
 
+        { "exit"        , Primitives::exit          , false },
     };
 
     for(Primitive p : primitives) {
