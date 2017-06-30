@@ -24,7 +24,7 @@
 #include <cfloat>
 #include <cstdint>
 
-//#define _DEBUG
+#define _DEBUG
 
 namespace Forth {
 
@@ -178,6 +178,8 @@ struct Primitives {
     static VM::State    pick        (VM* vm);
 
     static VM::State    exit        (VM* vm);
+
+    static VM::State    see         (VM* vm);
 };
 }
 

@@ -158,10 +158,10 @@ Primitives::branch(VM* vm) {
 
 VM::State
 Primitives::branchIf(VM* vm) {
-    VM::Value cond  = vm->top();
+    VM::Value addr  = vm->top();
     vm->pop();
 
-    VM::Value addr  = vm->top();
+    VM::Value cond  = vm->top();
     vm->pop();
 
     if( cond.i32 != 0 ) {
@@ -324,6 +324,34 @@ Primitives::exit(VM *vm) {
     VM::Value ret    = vm->top();
     vm->pop();
     ::exit(ret.i32);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::see(VM *vm) {
+    uint32_t    word    = vm->nameToWord[vm->getToken()];
+    std::cout << "[" << word << "] : " << vm->functions[word].name << " ";
+    if( vm->functions[word].native ) {
+         std::cout << " <native> ";
+    } else {
+        int32_t     curr    = vm->functions[word].start;
+        while( vm->words[curr] != 1 ) {
+            if( vm->words[curr] == 0 ) {
+                std::cout << vm->words[++curr] << " ";
+            } else {
+                std::cout << vm->functions[vm->words[curr]].name << " ";
+            }
+
+            ++curr;
+        }
+    }
+
+    if( vm->functions[word].isImmediate ) {
+        std::cout << "immediate";
+    }
+
+    std::cout << std::endl;
+
     return VM::State::NO_ERROR;
 }
 

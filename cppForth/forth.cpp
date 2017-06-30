@@ -239,6 +239,9 @@ VM::initPrimitives() {
         { "pick"        , Primitives::pick          , false },
 
         { "exit"        , Primitives::exit          , false },
+
+        { "see"         , Primitives::see           , false },
+
     };
 
     for(Primitive p : primitives) {
