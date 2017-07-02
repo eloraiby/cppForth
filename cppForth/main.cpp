@@ -112,7 +112,10 @@ core[] =
     ": repeat ws.p emit.i32 ; immediate\n" \
     ": until ' swap >ws ' ?branch >ws ; immediate\n" \
     ": ( repeat stream.getch 41 =/= until ; immediate\n" \
-    ": if ws.p 0 emit.i32 ' ; immediate\n"
+    ": \\ repeat stream.getch 13 =/= until ; immediate\n" \
+    ": if ws.p 0 emit.i32 ' swap >ws ' ?branch >ws ; immediate\n" \
+    ": then ws.p swap ; immediate\n" \
+    ": else ; immediate\n"
     ;
 
 int

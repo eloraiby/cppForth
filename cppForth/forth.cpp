@@ -1,4 +1,4 @@
-/* 
+/*
 ** Copyright (c) 2017 Wael El Oraiby.
 ** 
 ** This program is free software: you can redistribute it and/or modify  
