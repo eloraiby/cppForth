@@ -139,6 +139,8 @@ private:
 
     std::vector<IStream::Ptr>                   streams;
 
+    std::vector<uint8_t>                        constDataStack; // strings, names, ...
+
     uint32_t                                    wp;     // instruction pointer
     State                                       state;
 
@@ -175,16 +177,22 @@ struct Primitives {
     static VM::State    ilt         (VM* vm);
     static VM::State    igeq        (VM* vm);
     static VM::State    ileq        (VM* vm);
+
+    // machine stacks
     static VM::State    vsPtr       (VM* vm);
     static VM::State    rsPtr       (VM* vm);
     static VM::State    wsPtr       (VM* vm);
+    static VM::State    cdsPtr      (VM* vm);
+
     static VM::State    vsFetch     (VM* vm);
     static VM::State    rsFetch     (VM* vm);
     static VM::State    wsFetch     (VM* vm);
+    static VM::State    cdsFetch    (VM* vm);
+
     static VM::State    vsStore     (VM* vm);
     static VM::State    rsStore     (VM* vm);
     static VM::State    wsStore     (VM* vm);
-
+    static VM::State    cdsStore    (VM* vm);
 
     static VM::State    exit        (VM* vm);
 

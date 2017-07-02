@@ -104,18 +104,18 @@ struct StringStream : public Forth::IStream {
 
 const char
 core[] =
-    ": *2 2 * ;\n" \
-    ": /2 2 / ;\n" \
-    ": 1+ 1 + ;\n" \
-    ": 1- 1 - ;\n" \
-    ": emit.i32 ' lit.i32 >ws >ws ;\n" \
-    ": repeat ws.p emit.i32 ; immediate\n" \
+    ": i32>ws ' lit.i32 >ws >ws ;\n" \
+    ": repeat ws.p i32>ws ; immediate\n" \
     ": until ' swap >ws ' ?branch >ws ; immediate\n" \
     ": ( repeat stream.getch 41 =/= until ; immediate\n" \
     ": \\ repeat stream.getch 13 =/= until ; immediate\n" \
-    ": if ws.p 0 emit.i32 ' swap >ws ' ?branch >ws ; immediate\n" \
+    ": if ws.p 0 i32>ws ' swap >ws ' ?branch >ws ; immediate\n" \
     ": then ws.p swap ; immediate\n" \
-    ": else ; immediate\n"
+    ": else ; immediate\n" \
+    ": *2 2 * ;\n" \
+    ": /2 2 / ;\n" \
+    ": 1+ 1 + ;\n" \
+    ": 1- 1 - ;\n"
     ;
 
 int
