@@ -132,16 +132,17 @@ private:
     std::vector<Function>                       functions;
     std::unordered_map<std::string, uint32_t>   nameToWord;
 
-    std::vector<uint32_t>                       words;
+    std::vector<uint32_t>                       words;          // the code segment
 
-    std::vector<Value>                          valueStack;
-    std::vector<uint32_t>                       returnStack;
+    std::vector<Value>                          valueStack;     // contains values on the stack
+    std::vector<uint32_t>                       returnStack;    // contains calling word pointer
+    std::vector<uint32_t>                       debugStack;     // contains current executing words
 
     std::vector<IStream::Ptr>                   streams;
 
     std::vector<Value>                          constDataStack; // strings, names, ...
 
-    uint32_t                                    wp;     // instruction pointer
+    uint32_t                                    wp;             // instruction pointer
     State                                       state;
 
     friend struct   Primitives;
