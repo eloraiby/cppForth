@@ -216,6 +216,15 @@ Primitives::endWord(VM* vm) {
 }
 
 VM::State
+Primitives::emitReturn(VM* vm) {
+    VM::Value v   = vm->top();
+    vm->pop();
+
+    vm->returnStack.push_back(v.u32);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
 Primitives::emitWord(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
@@ -226,6 +235,15 @@ Primitives::emitWord(VM* vm) {
         vm->emit(v.u32);
         return VM::State::NO_ERROR;
     }
+}
+
+VM::State
+Primitives::emitConstData(VM* vm) {
+    VM::Value v   = vm->top();
+    vm->pop();
+
+    vm->constDataStack.push_back(v);
+    return VM::State::NO_ERROR;
 }
 
 VM::State
@@ -332,6 +350,14 @@ Primitives::wsPtr(VM *vm) {
 }
 
 VM::State
+Primitives::cdsPtr(VM* vm) {
+    VM::Value v(static_cast<int32_t>(vm->constDataStack.size()) - 1);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+
+VM::State
 Primitives::vsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
@@ -357,6 +383,16 @@ Primitives::wsFetch(VM *vm) {
     vm->pop();
 
     VM::Value v(static_cast<int32_t>(vm->words[addr.i32]));
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::cdsFetch(VM *vm) {
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    VM::Value v = vm->constDataStack[addr.i32];
     vm->push(v);
     return VM::State::NO_ERROR;
 }
@@ -394,6 +430,18 @@ Primitives::wsStore(VM *vm) {
     vm->pop();
 
     vm->words[addr.i32] = v.u32;
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::cdsStore(VM *vm) {
+    VM::Value addr  = vm->top();
+    vm->pop();
+
+    VM::Value v     = vm->top();
+    vm->pop();
+
+    vm->constDataStack[addr.i32] = v;
     return VM::State::NO_ERROR;
 }
 

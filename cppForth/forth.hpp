@@ -139,7 +139,7 @@ private:
 
     std::vector<IStream::Ptr>                   streams;
 
-    std::vector<uint8_t>                        constDataStack; // strings, names, ...
+    std::vector<Value>                          constDataStack; // strings, names, ...
 
     uint32_t                                    wp;     // instruction pointer
     State                                       state;
@@ -149,54 +149,56 @@ private:
 
 struct Primitives {
     // primitives
-    static VM::State    fetchInt32  (VM* vm);
-    static VM::State    returnWord  (VM* vm);
-    static VM::State    wordId      (VM* vm);
-    static VM::State    printInt32  (VM* vm);
-    static VM::State    defineWord  (VM* vm);
-    static VM::State    immediate   (VM* vm);
-    static VM::State    addInt32    (VM* vm);
-    static VM::State    subInt32    (VM* vm);
-    static VM::State    mulInt32    (VM* vm);
-    static VM::State    divInt32    (VM* vm);
-    static VM::State    modInt32    (VM* vm);
-    static VM::State    branch      (VM* vm);
-    static VM::State    branchIf    (VM* vm);
-    static VM::State    dup         (VM* vm);
-    static VM::State    drop        (VM* vm);
-    static VM::State    swap        (VM* vm);
-    static VM::State    codeSize    (VM* vm);
-    static VM::State    endWord     (VM* vm);
-    static VM::State    emitWord    (VM* vm);
-    static VM::State    streamPeek  (VM* vm);
-    static VM::State    streamGetCH (VM* vm);
-    static VM::State    streamToken (VM* vm);
-    static VM::State    ieq         (VM* vm);
-    static VM::State    ineq        (VM* vm);
-    static VM::State    igt         (VM* vm);
-    static VM::State    ilt         (VM* vm);
-    static VM::State    igeq        (VM* vm);
-    static VM::State    ileq        (VM* vm);
+    static VM::State    fetchInt32      (VM* vm);
+    static VM::State    returnWord      (VM* vm);
+    static VM::State    wordId          (VM* vm);
+    static VM::State    printInt32      (VM* vm);
+    static VM::State    defineWord      (VM* vm);
+    static VM::State    immediate       (VM* vm);
+    static VM::State    addInt32        (VM* vm);
+    static VM::State    subInt32        (VM* vm);
+    static VM::State    mulInt32        (VM* vm);
+    static VM::State    divInt32        (VM* vm);
+    static VM::State    modInt32        (VM* vm);
+    static VM::State    branch          (VM* vm);
+    static VM::State    branchIf        (VM* vm);
+    static VM::State    dup             (VM* vm);
+    static VM::State    drop            (VM* vm);
+    static VM::State    swap            (VM* vm);
+    static VM::State    codeSize        (VM* vm);
+    static VM::State    endWord         (VM* vm);
+    static VM::State    emitReturn      (VM* vm);
+    static VM::State    emitWord        (VM* vm);
+    static VM::State    emitConstData   (VM* vm);
+    static VM::State    streamPeek      (VM* vm);
+    static VM::State    streamGetCH     (VM* vm);
+    static VM::State    streamToken     (VM* vm);
+    static VM::State    ieq             (VM* vm);
+    static VM::State    ineq            (VM* vm);
+    static VM::State    igt             (VM* vm);
+    static VM::State    ilt             (VM* vm);
+    static VM::State    igeq            (VM* vm);
+    static VM::State    ileq            (VM* vm);
 
     // machine stacks
-    static VM::State    vsPtr       (VM* vm);
-    static VM::State    rsPtr       (VM* vm);
-    static VM::State    wsPtr       (VM* vm);
-    static VM::State    cdsPtr      (VM* vm);
+    static VM::State    vsPtr           (VM* vm);
+    static VM::State    rsPtr           (VM* vm);
+    static VM::State    wsPtr           (VM* vm);
+    static VM::State    cdsPtr          (VM* vm);
 
-    static VM::State    vsFetch     (VM* vm);
-    static VM::State    rsFetch     (VM* vm);
-    static VM::State    wsFetch     (VM* vm);
-    static VM::State    cdsFetch    (VM* vm);
+    static VM::State    vsFetch         (VM* vm);
+    static VM::State    rsFetch         (VM* vm);
+    static VM::State    wsFetch         (VM* vm);
+    static VM::State    cdsFetch        (VM* vm);
 
-    static VM::State    vsStore     (VM* vm);
-    static VM::State    rsStore     (VM* vm);
-    static VM::State    wsStore     (VM* vm);
-    static VM::State    cdsStore    (VM* vm);
+    static VM::State    vsStore         (VM* vm);
+    static VM::State    rsStore         (VM* vm);
+    static VM::State    wsStore         (VM* vm);
+    static VM::State    cdsStore        (VM* vm);
 
-    static VM::State    exit        (VM* vm);
+    static VM::State    exit            (VM* vm);
 
-    static VM::State    see         (VM* vm);
+    static VM::State    see             (VM* vm);
 };
 }
 

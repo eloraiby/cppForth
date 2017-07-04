@@ -220,14 +220,16 @@ VM::initPrimitives() {
         { "*"           , Primitives::mulInt32      , false },
         { "/"           , Primitives::divInt32      , false },
         { "%"           , Primitives::modInt32      , false },
-        { "branch"      , Primitives::branch        , false },
-        { "?branch"     , Primitives::branchIf      , false },
+        { "branch"      , Primitives::branch        , false },  // ( addr -- )
+        { "?branch"     , Primitives::branchIf      , false },  // ( cond addr -- )
         { "dup"         , Primitives::dup           , false },
         { "drop"        , Primitives::drop          , false },
         { "swap"        , Primitives::swap          , false },
         { "code.size"   , Primitives::codeSize      , false },
         { ";"           , Primitives::endWord       , true  },
+        { ">rs"         , Primitives::emitReturn    , false },
         { ">ws"         , Primitives::emitWord      , false },
+        { ">cds"        , Primitives::emitConstData , false },
         { "stream.peek" , Primitives::streamPeek    , false },
         { "stream.getch", Primitives::streamGetCH   , false },
         { "=="          , Primitives::ieq           , false },
@@ -240,13 +242,15 @@ VM::initPrimitives() {
         { "vs.p"        , Primitives::vsPtr         , false },
         { "rs.p"        , Primitives::rsPtr         , false },
         { "ws.p"        , Primitives::wsPtr         , false },
+        { "cds.p"       , Primitives::cdsPtr        , false },
         { "@vs"         , Primitives::vsFetch       , false },
         { "@rs"         , Primitives::rsFetch       , false },
         { "@ws"         , Primitives::wsFetch       , false },
+        { "@cds"        , Primitives::cdsFetch      , false },
         { "!vs"         , Primitives::vsStore       , false },
         { "!rs"         , Primitives::rsStore       , false },
         { "!ws"         , Primitives::wsStore       , false },
-
+        { "!cds"        , Primitives::cdsStore      , false },
 
         { "exit"        , Primitives::exit          , false },
 
