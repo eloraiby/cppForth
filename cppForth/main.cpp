@@ -104,19 +104,20 @@ struct StringStream : public Forth::IStream {
 
 const char
 core[] =
-    ": i32>ws ' lit.i32 >ws >ws ;\n" \
-    ": begin ws.p i32>ws ; immediate\n" \
-    ": until ' swap >ws ' ?branch >ws ; immediate\n" \
+    ": i32>w ' lit.i32 >w >w ;\n" \
+    ": begin w.p ; immediate\n" \
+    ": until i32>w ' ?branch >w ; immediate\n" \
     ": (  begin stream.getch 41 =/= until ; immediate\n" \
     ": \\ begin stream.getch 13 =/= until ; immediate\n" \
     ": if ( cond -- )\n" \
-    "   ws.p\n" \
-    "   0 i32>ws\n" \
-    "   ' swap >ws\n" \
-    "   ' ?branch >ws\n" \
+    "   w.p 3 +\n" \
+    "   i32>w \\ 0 1\n" \
+    "   ' ?branch >w \\ 2\n" \
+    "   w.p\n" \
+    "   0 i32>w \\ 3\n"\
+    "   ' branch >w \\ 4\n" \
     "; immediate\n" \
     ": then\n" \
-    "   ws.p swap\n" \
     "   \n" \
     "; immediate\n" \
     ": else ; immediate\n" \
