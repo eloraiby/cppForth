@@ -114,11 +114,11 @@ core[] =
     "   i32>w \\ 0 1\n" \
     "   ' ?branch >w \\ 2\n" \
     "   w.p\n" \
-    "   0 i32>w \\ 3\n"\
-    "   ' branch >w \\ 4\n" \
+    "   0 i32>w \\ 3 4\n"\
+    "   ' branch >w \\ 5\n" \
     "; immediate\n" \
     ": then\n" \
-    "   \n" \
+    "   w.p swap 1 + !\n" \
     "; immediate\n" \
     ": else ; immediate\n" \
     ": *2 2 * ;\n" \
