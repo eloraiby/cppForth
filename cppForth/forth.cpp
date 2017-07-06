@@ -245,9 +245,9 @@ VM::initPrimitives() {
         { "<"           , Primitives::ilt           , false },
         { ">="          , Primitives::igeq          , false },
         { "<="          , Primitives::ileq          , false },
-        { "not"         , Primitives::not           , false },
-        { "and"         , Primitives::and           , false },
-        { "or"          , Primitives::or            , false },
+        { "not"         , Primitives::notBW         , false },
+        { "and"         , Primitives::andBW         , false },
+        { "or"          , Primitives::orBW          , false },
 
         { "v.p"         , Primitives::vsPtr         , false },
         { "r.p"         , Primitives::rsPtr         , false },

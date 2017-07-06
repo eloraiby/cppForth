@@ -110,15 +110,13 @@ core[] =
     ": (  begin stream.getch dup 0 =/= swap 41 =/= and until ; immediate\n" \
     ": \\ begin stream.getch dup 0 =/= swap 10 =/= and until ; immediate\n" \
     ": if ( cond -- )\n" \
-    "   w.p 3 +\n" \
+    "   w.p 1 +\n" \
     "   i32>w \\ 0 1\n" \
-    "   ' ?branch >w \\ 2\n" \
-    "   w.p\n" \
-    "   0 i32>w \\ 3 4\n"\
-    "   ' branch >w \\ 5\n" \
+    "   ' branch >w \\ 2\n" \
     "; immediate\n" \
     ": then\n" \
-    "   w.p swap 1 + !w\n" \
+    "   >w\n" \
+    "   ' ?branch >w\n" \
     "; immediate\n" \
     ": else ; immediate\n" \
     ": \" begin stream.getch dup dup 0 =/= swap 34 =/= and dup if swap >cd then until ; immediate\n" \

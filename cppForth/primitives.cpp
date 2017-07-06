@@ -229,14 +229,8 @@ VM::State
 Primitives::emitWord(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
-
-    if( v.i32 < 0 || v.u32 >= vm->functions.size() ) {
-        std::cerr << "ERROR: word id is out of range" << std::endl;
-        return VM::State::WORD_ID_OUT_OF_RANGE;
-    } else {
-        vm->emit(v.u32);
-        return VM::State::NO_ERROR;
-    }
+    vm->emit(v.u32);
+    return VM::State::NO_ERROR;
 }
 
 VM::State
@@ -340,7 +334,7 @@ Primitives::ileq(VM* vm) {
 }
 
 VM::State
-Primitives::not(VM* vm) {
+Primitives::notBW(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
 
@@ -349,7 +343,7 @@ Primitives::not(VM* vm) {
 }
 
 VM::State
-Primitives::and(VM* vm) {
+Primitives::andBW(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
@@ -359,7 +353,7 @@ Primitives::and(VM* vm) {
 }
 
 VM::State
-Primitives::or(VM* vm) {
+Primitives::orBW(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();

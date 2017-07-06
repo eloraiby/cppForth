@@ -190,9 +190,9 @@ struct Primitives {
     static VM::State    ilt             (VM* vm);
     static VM::State    igeq            (VM* vm);
     static VM::State    ileq            (VM* vm);
-    static VM::State    not             (VM* vm);
-    static VM::State    and             (VM* vm);
-    static VM::State    or              (VM* vm);
+    static VM::State    notBW           (VM* vm);
+    static VM::State    andBW           (VM* vm);
+    static VM::State    orBW            (VM* vm);
 
     // machine stacks
     static VM::State    vsPtr           (VM* vm);
