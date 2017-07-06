@@ -107,8 +107,8 @@ core[] =
     ": i32>w ' lit.i32 >w >w ;\n" \
     ": begin w.p ; immediate\n" \
     ": until i32>w ' ?branch >w ; immediate\n" \
-    ": (  begin stream.getch 41 =/= until ; immediate\n" \
-    ": \\ begin stream.getch 13 =/= until ; immediate\n" \
+    ": (  begin stream.getch dup 0 =/= swap 41 =/= and until ; immediate\n" \
+    ": \\ begin stream.getch dup 0 =/= swap 10 =/= and until ; immediate\n" \
     ": if ( cond -- )\n" \
     "   w.p 3 +\n" \
     "   i32>w \\ 0 1\n" \
@@ -118,9 +118,10 @@ core[] =
     "   ' branch >w \\ 5\n" \
     "; immediate\n" \
     ": then\n" \
-    "   w.p swap 1 + !\n" \
+    "   w.p swap 1 + !w\n" \
     "; immediate\n" \
     ": else ; immediate\n" \
+    ": \" begin stream.getch dup dup 0 =/= swap 34 =/= and dup if swap >cd then until ; immediate\n" \
     ": *2 2 * ;\n" \
     ": /2 2 / ;\n" \
     ": +1 1 + ;\n" \

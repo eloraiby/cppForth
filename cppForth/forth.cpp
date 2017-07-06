@@ -111,7 +111,9 @@ VM::step() {
         std::cout << std::endl;
 #endif
         if( functions[word].native ) {
+            callStack.push_back(word);
             state = functions[word].native(this);
+            callStack.pop_back();
             ++wp;
         } else {
             if(  functions[word].start == -1 ) {
@@ -163,6 +165,7 @@ VM::loadStream(IStream::Ptr strm) {
                 valueStack.push_back(v);
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
+                    std::cerr << "ERROR: word not found (" << tok << ")" << std::endl;
                     state = State::WORD_NOT_FOUND;
                 } else {
                     runCall(nameToWord[tok]);
@@ -176,6 +179,7 @@ VM::loadStream(IStream::Ptr strm) {
                 emit(Value(toInt32(tok)).u32);
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
+                    std::cerr << "ERROR: word not found (" << tok << ")" << std::endl;
                     state = State::WORD_NOT_FOUND;
                 } else {
                     uint32_t    word    = nameToWord[tok];
@@ -230,30 +234,40 @@ VM::initPrimitives() {
         { ">r"          , Primitives::emitReturn    , false },
         { ">w"          , Primitives::emitWord      , false },
         { ">cd"         , Primitives::emitConstData , false },
+        { ">e"          , Primitives::emitException , false },
+
         { "stream.peek" , Primitives::streamPeek    , false },
         { "stream.getch", Primitives::streamGetCH   , false },
+        
         { "=="          , Primitives::ieq           , false },
         { "=/="         , Primitives::ineq          , false },
         { ">"           , Primitives::igt           , false },
         { "<"           , Primitives::ilt           , false },
         { ">="          , Primitives::igeq          , false },
         { "<="          , Primitives::ileq          , false },
+        { "not"         , Primitives::not           , false },
+        { "and"         , Primitives::and           , false },
+        { "or"          , Primitives::or            , false },
 
         { "v.p"         , Primitives::vsPtr         , false },
         { "r.p"         , Primitives::rsPtr         , false },
         { "w.p"         , Primitives::wsPtr         , false },
         { "cd.p"        , Primitives::cdsPtr        , false },
+        { "e.p"         , Primitives::esPtr         , false },
         { "@"           , Primitives::vsFetch       , false },
         { "@r"          , Primitives::rsFetch       , false },
         { "@w"          , Primitives::wsFetch       , false },
         { "@cd"         , Primitives::cdsFetch      , false },
+        { "@e"          , Primitives::esFetch       , false },
         { "!"           , Primitives::vsStore       , false },
         { "!r"          , Primitives::rsStore       , false },
         { "!w"          , Primitives::wsStore       , false },
         { "!cd"         , Primitives::cdsStore      , false },
+        { "!e"          , Primitives::esStore       , false },
 
         { "exit"        , Primitives::exit          , false },
 
+        { ".s"          , Primitives::showValueStack, false },
         { "see"         , Primitives::see           , false },
 
     };

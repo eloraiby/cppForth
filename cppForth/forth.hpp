@@ -24,7 +24,9 @@
 #include <cfloat>
 #include <cstdint>
 
+#ifndef _DEBUG
 #define _DEBUG
+#endif
 
 namespace Forth {
 
@@ -63,6 +65,7 @@ struct VM {
         RS_OVERFLOW     = -6,
         WORD_NOT_DEFINED= -7,
         INT_IS_NO_WORD  = -8,
+        WORD_ID_OUT_OF_RANGE    = -9,
     };
 
     union Value {
@@ -111,11 +114,13 @@ struct VM {
 
     uint32_t        addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate);
 
+    void            throwException(const std::string& string, State s);
+
     VM();
 
 private:
-    inline void     setCall(uint32_t word)      { returnStack.push_back(wp); wp = functions[word].start; }
-    inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); }
+    inline void     setCall(uint32_t word)      { callStack.push_back(word); returnStack.push_back(wp); wp = functions[word].start; }
+    inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); callStack.pop_back(); }
     inline void     setBranch(uint32_t addr)    { wp = addr; }
 
     uint32_t        fetch()                     { ++wp; return words[wp]; }
@@ -136,7 +141,8 @@ private:
 
     std::vector<Value>                          valueStack;     // contains values on the stack
     std::vector<uint32_t>                       returnStack;    // contains calling word pointer
-    std::vector<uint32_t>                       debugStack;     // contains current executing words
+    std::vector<uint32_t>                       callStack;      // contains current executing words
+    std::vector<State>                          exceptionStack; // exception stack
 
     std::vector<IStream::Ptr>                   streams;
 
@@ -168,37 +174,49 @@ struct Primitives {
     static VM::State    swap            (VM* vm);
     static VM::State    codeSize        (VM* vm);
     static VM::State    endWord         (VM* vm);
+
     static VM::State    emitReturn      (VM* vm);
     static VM::State    emitWord        (VM* vm);
     static VM::State    emitConstData   (VM* vm);
+    static VM::State    emitException   (VM* vm);
+
     static VM::State    streamPeek      (VM* vm);
     static VM::State    streamGetCH     (VM* vm);
     static VM::State    streamToken     (VM* vm);
+
     static VM::State    ieq             (VM* vm);
     static VM::State    ineq            (VM* vm);
     static VM::State    igt             (VM* vm);
     static VM::State    ilt             (VM* vm);
     static VM::State    igeq            (VM* vm);
     static VM::State    ileq            (VM* vm);
+    static VM::State    not             (VM* vm);
+    static VM::State    and             (VM* vm);
+    static VM::State    or              (VM* vm);
 
     // machine stacks
     static VM::State    vsPtr           (VM* vm);
     static VM::State    rsPtr           (VM* vm);
     static VM::State    wsPtr           (VM* vm);
     static VM::State    cdsPtr          (VM* vm);
+    static VM::State    esPtr           (VM* vm);
 
     static VM::State    vsFetch         (VM* vm);
     static VM::State    rsFetch         (VM* vm);
     static VM::State    wsFetch         (VM* vm);
     static VM::State    cdsFetch        (VM* vm);
+    static VM::State    esFetch         (VM* vm);
 
     static VM::State    vsStore         (VM* vm);
     static VM::State    rsStore         (VM* vm);
     static VM::State    wsStore         (VM* vm);
     static VM::State    cdsStore        (VM* vm);
+    static VM::State    esStore         (VM* vm);
 
     static VM::State    exit            (VM* vm);
 
+    // debug helpers
+    static VM::State    showValueStack  (VM* vm);
     static VM::State    see             (VM* vm);
 };
 }

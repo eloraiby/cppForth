@@ -42,6 +42,7 @@ Primitives::wordId(VM* vm) {
     }
 
     if( vm->nameToWord.find(name) == vm->nameToWord.end() ) {
+        std::cerr << "ERROR: word not found (" << name << ")" << std::endl;
         return VM::State::WORD_NOT_FOUND;
     }
     
@@ -230,7 +231,8 @@ Primitives::emitWord(VM* vm) {
     vm->pop();
 
     if( v.i32 < 0 || v.u32 >= vm->functions.size() ) {
-        return VM::State::WORD_NOT_FOUND;
+        std::cerr << "ERROR: word id is out of range" << std::endl;
+        return VM::State::WORD_ID_OUT_OF_RANGE;
     } else {
         vm->emit(v.u32);
         return VM::State::NO_ERROR;
@@ -239,10 +241,19 @@ Primitives::emitWord(VM* vm) {
 
 VM::State
 Primitives::emitConstData(VM* vm) {
-    VM::Value v   = vm->top();
+    VM::Value v = vm->top();
     vm->pop();
 
     vm->constDataStack.push_back(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::emitException(VM* vm) {
+    VM::Value v = vm->top();
+    vm->pop();
+
+    vm->exceptionStack.push_back(static_cast<VM::State>(v.i32));
     return VM::State::NO_ERROR;
 }
 
@@ -274,7 +285,7 @@ Primitives::ieq(VM* vm) {
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
-    vm->push(VM::Value(a.i32 == b.i32));
+    vm->push(VM::Value((a.i32 == b.i32) ? -1 : 0));
     return VM::State::NO_ERROR;
 }
 
@@ -284,7 +295,7 @@ Primitives::ineq(VM* vm) {
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
-    vm->push(VM::Value(a.i32 != b.i32));
+    vm->push(VM::Value((a.i32 != b.i32) ? -1 : 0));
     return VM::State::NO_ERROR;
 }
 
@@ -329,6 +340,35 @@ Primitives::ileq(VM* vm) {
 }
 
 VM::State
+Primitives::not(VM* vm) {
+    VM::Value v   = vm->top();
+    vm->pop();
+
+    vm->push(VM::Value(!v.u32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::and(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.u32 & b.u32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::or(VM* vm) {
+    VM::Value b   = vm->top();
+    vm->pop();
+    VM::Value a   = vm->top();
+    vm->pop();
+    vm->push(VM::Value(a.u32 | b.u32));
+    return VM::State::NO_ERROR;
+}
+
+VM::State
 Primitives::vsPtr(VM *vm) {
     VM::Value v(static_cast<int32_t>(vm->valueStack.size()) - 1);
     vm->push(v);
@@ -356,6 +396,12 @@ Primitives::cdsPtr(VM* vm) {
     return VM::State::NO_ERROR;
 }
 
+VM::State
+Primitives::esPtr(VM* vm) {
+    VM::Value v(static_cast<int32_t>(vm->exceptionStack.size()) - 1);
+    vm->push(v);
+    return VM::State::NO_ERROR;
+}
 
 VM::State
 Primitives::vsFetch(VM *vm) {
@@ -394,6 +440,16 @@ Primitives::cdsFetch(VM *vm) {
 
     VM::Value v = vm->constDataStack[addr.i32];
     vm->push(v);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::esFetch(VM *vm) {
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    VM::State v = vm->exceptionStack[addr.i32];
+    vm->push(VM::Value(static_cast<int32_t>(v)));
     return VM::State::NO_ERROR;
 }
 
@@ -446,10 +502,30 @@ Primitives::cdsStore(VM *vm) {
 }
 
 VM::State
+Primitives::esStore(VM *vm) {
+    VM::Value addr  = vm->top();
+    vm->pop();
+
+    VM::Value v     = vm->top();
+    vm->pop();
+
+    vm->exceptionStack[addr.i32] = static_cast<VM::State>(v.i32);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
 Primitives::exit(VM *vm) {
     VM::Value ret    = vm->top();
     vm->pop();
     ::exit(ret.i32);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::showValueStack(VM* vm) {
+    for( size_t i = 0; i < vm->valueStack.size(); ++i ) {
+        std::cout << "vs@" << i << " -- " << std::hex << vm->valueStack[i].u32 << std::dec << std::endl;
+    }
     return VM::State::NO_ERROR;
 }
 
