@@ -105,26 +105,27 @@ struct StringStream : public Forth::IStream {
 const char
 core[] =
     ": i32>w ' lit.i32 >w >w ;\n" \
-    ": repeat w.p ; immediate\n" \
+    ": w.p+ w.p 1 + ;\n" \
+    ": repeat w.p+ ; immediate\n" \
     ": until i32>w ' ?branch >w ; immediate\n" \
     ": (  repeat stream.getch dup 0 =/= swap 41 =/= and until ; immediate\n" \
     ": \\ repeat stream.getch dup 0 =/= swap 10 =/= and until ; immediate\n" \
     ": if ( cond -- )\n" \
-    "   w.p 6 + i32>w\n" \
+    "   w.p+ 6 + i32>w\n" \
     "   ' ?branch >w\n" \
     "   w.p 2 +\n" \
     "   0 i32>w\n" \
     "   ' branch >w\n" \
     "; immediate\n" \
     ": then\n" \
-    "   w.p swap !w\n" \
+    "   w.p+ swap !w\n" \
     "; immediate\n" \
     ": else ; immediate\n" \
     ": \" repeat \n" \
     "   stream.getch dup dup dup \n" \
-    "   dup 10 .c swap .c 10 .c \n" \
     "   0 =/= swap 34 =/= and \n" \
     "   if \n" \
+    "       dup 10 .c swap .c 10 .c \n" \
     "       >cd \n" \
     "   then \n" \
     "   until \n" \

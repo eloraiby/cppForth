@@ -160,7 +160,7 @@ Primitives::branch(VM* vm) {
     VM::Value addr  = vm->top();
     vm->pop();
 
-    vm->setBranch(addr.i32);
+    vm->setBranch(addr.i32 - 1);
 
     return VM::State::NO_ERROR;
 }
@@ -174,7 +174,7 @@ Primitives::branchIf(VM* vm) {
     vm->pop();
 
     if( cond.i32 != 0 ) {
-        vm->setBranch(addr.i32);
+        vm->setBranch(addr.i32 - 1);
     }
 
     return VM::State::NO_ERROR;
