@@ -104,7 +104,7 @@ VM::step() {
         }
 
 #ifdef _DEBUG
-        std::cout << "@" << wp << " -- " << functions[word].name;
+        std::cout << "    @" << wp << " -- " << functions[word].name;
         if( word == 0 ) {
             std::cout << " " << words[wp + 1];
         }
@@ -120,6 +120,9 @@ VM::step() {
                 state = State::WORD_NOT_DEFINED;
                 return;
             } else {
+#ifdef _DEBUG
+                std::cout << functions[word].name << ":" << std::endl;
+#endif
                 setCall(word);
             }
         }
@@ -129,11 +132,16 @@ VM::step() {
 void
 VM::runCall(uint32_t word) {
     
+#ifdef _DEBUG
+    std::cout << functions[word].name << ":" << std::endl;
+#endif
+
     if( state != State::NO_ERROR ) {
         return;
     }
 
     if( word > functions.size() ) {
+        std::cerr << "ERROR: word outside code segement" << std::endl;
         state = State::WORD_NOT_FOUND;
         return;
     }
@@ -219,6 +227,7 @@ VM::initPrimitives() {
         { ":"           , Primitives::defineWord    , false },
         { "immediate"   , Primitives::immediate     , true  },
         { "."           , Primitives::printInt32    , false },
+        { ".c"          , Primitives::printChar     , false },
         { "+"           , Primitives::addInt32      , false },
         { "-"           , Primitives::subInt32      , false },
         { "*"           , Primitives::mulInt32      , false },

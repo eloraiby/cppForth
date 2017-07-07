@@ -160,6 +160,7 @@ struct Primitives {
     static VM::State    returnWord      (VM* vm);
     static VM::State    wordId          (VM* vm);
     static VM::State    printInt32      (VM* vm);
+    static VM::State    printChar       (VM* vm);
     static VM::State    defineWord      (VM* vm);
     static VM::State    immediate       (VM* vm);
     static VM::State    addInt32        (VM* vm);

@@ -105,25 +105,35 @@ struct StringStream : public Forth::IStream {
 const char
 core[] =
     ": i32>w ' lit.i32 >w >w ;\n" \
-    ": begin w.p ; immediate\n" \
+    ": repeat w.p ; immediate\n" \
     ": until i32>w ' ?branch >w ; immediate\n" \
-    ": (  begin stream.getch dup 0 =/= swap 41 =/= and until ; immediate\n" \
-    ": \\ begin stream.getch dup 0 =/= swap 10 =/= and until ; immediate\n" \
+    ": (  repeat stream.getch dup 0 =/= swap 41 =/= and until ; immediate\n" \
+    ": \\ repeat stream.getch dup 0 =/= swap 10 =/= and until ; immediate\n" \
     ": if ( cond -- )\n" \
-    "   w.p 1 +\n" \
-    "   i32>w \\ 0 1\n" \
-    "   ' branch >w \\ 2\n" \
+    "   w.p 6 + i32>w\n" \
+    "   ' ?branch >w\n" \
+    "   w.p 2 +\n" \
+    "   0 i32>w\n" \
+    "   ' branch >w\n" \
     "; immediate\n" \
     ": then\n" \
-    "   >w\n" \
-    "   ' ?branch >w\n" \
+    "   w.p swap !w\n" \
     "; immediate\n" \
     ": else ; immediate\n" \
-    ": \" begin stream.getch dup dup 0 =/= swap 34 =/= and dup if swap >cd then until ; immediate\n" \
+    ": \" repeat \n" \
+    "   stream.getch dup dup dup \n" \
+    "   dup 10 .c swap .c 10 .c \n" \
+    "   0 =/= swap 34 =/= and \n" \
+    "   if \n" \
+    "       >cd \n" \
+    "   then \n" \
+    "   until \n" \
+    "; immediate \n" \
     ": *2 2 * ;\n" \
     ": /2 2 / ;\n" \
     ": +1 1 + ;\n" \
-    ": -1 1 - ;\n"
+    ": -1 1 - ;\n" \
+    ": p1 0 == if 123 . then ;" \
     ;
 
 int

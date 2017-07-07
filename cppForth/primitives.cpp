@@ -61,6 +61,14 @@ Primitives::printInt32(VM* vm) {
 }
 
 VM::State
+Primitives::printChar(VM* vm) {
+    VM::Value   v   = vm->top();
+    vm->pop();
+    std::cout << static_cast<char>(v.i32);
+    return VM::State::NO_ERROR;
+}
+
+VM::State
 Primitives::defineWord(VM* vm) {
 
     std::string name    = vm->getToken();
@@ -535,7 +543,7 @@ Primitives::see(VM *vm) {
             if( vm->words[curr] == 0 ) {
                 std::cout << vm->words[++curr] << " ";
             } else {
-                std::cout << vm->functions[vm->words[curr]].name << " ";
+                std::cout << "@" << curr << ":" << vm->functions[vm->words[curr]].name << " ";
             }
 
             ++curr;
