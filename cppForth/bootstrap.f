@@ -1,9 +1,7 @@
 : i32>w ' lit.i32 >w >w ;
 
-: w.p+ w.p 1 + ;
-
 : do immediate
-    w.p+ ; 
+    w.p 1 + ; 
 
 : while immediate
     i32>w
@@ -28,14 +26,14 @@
     while ; 
 
 : if immediate ( cond -- )
-    w.p+ 6 + i32>w
+    w.p 7 + i32>w
     ' ?branch >w
     w.p 2 +
     0 i32>w
     ' branch >w ; 
 
 : then immediate
-    w.p+ swap !w ;
+    w.p 1 + swap !w ;
     
 : else ; immediate
 

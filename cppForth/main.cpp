@@ -132,7 +132,7 @@ main(int argc, char* argv[]) {
     Forth::VM*  vm  = new Forth::VM();
 
     std::string core    = readFile("bootstrap.f");
-    std::cout << core << std::endl;
+
     Forth::IStream::Ptr coreStream(new StringStream(core.c_str()));
     vm->loadStream(coreStream);
 

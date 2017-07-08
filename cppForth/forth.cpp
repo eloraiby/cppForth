@@ -136,7 +136,7 @@ VM::throwException(ErrorCase err, const std::string& str) {
     std::cerr << str << std::endl;
 
     // TODO: switch to debug stream (debugging stream)
-    popStream();
+    // popStream();
     stream()->setMode(IStream::Mode::EVAL);
 }
 
@@ -183,7 +183,7 @@ VM::loadStream(IStream::Ptr strm) {
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
                     char buff[MAX_BUFF] = {0};
-                    sprintf("ERROR: word not found (%s)", tok.c_str());
+                    sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
                     throwException(ErrorCase::WORD_NOT_FOUND, buff);
                 } else {
                     runCall(nameToWord[tok]);
@@ -198,7 +198,7 @@ VM::loadStream(IStream::Ptr strm) {
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
                     char buff[MAX_BUFF] = {0};
-                    sprintf("ERROR: word not found (%s)", tok.c_str());
+                    sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
                     throwException(ErrorCase::WORD_NOT_FOUND, buff);
                 } else {
                     uint32_t    word    = nameToWord[tok];
