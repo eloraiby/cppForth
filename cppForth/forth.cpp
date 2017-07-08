@@ -34,9 +34,9 @@ uint32_t
 VM::addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate) {
     uint32_t    wordId  = static_cast<uint32_t>(functions.size());
     Function    func;
-#ifdef _DEBUG
+
     func.name   = name;
-#endif
+
     func.start  = -1;
     func.native = native;
     func.isImmediate    = isImmediate;
@@ -103,13 +103,14 @@ VM::step() {
             return;
         }
 
-#ifdef _DEBUG
-        std::cout << "    @" << wp << " -- " << functions[word].name;
-        if( word == 0 ) {
-            std::cout << " " << words[wp + 1];
+        if( verboseDebugging ) {
+            std::cout << "    @" << wp << " -- " << functions[word].name;
+            if( word == 0 ) {
+                std::cout << " " << words[wp + 1];
+            }
+            std::cout << std::endl;
         }
-        std::cout << std::endl;
-#endif
+
         if( functions[word].native ) {
             callStack.push_back(word);
             state = functions[word].native(this);
@@ -120,9 +121,9 @@ VM::step() {
                 state = State::WORD_NOT_DEFINED;
                 return;
             } else {
-#ifdef _DEBUG
-                std::cout << functions[word].name << ":" << std::endl;
-#endif
+                if( verboseDebugging ) {
+                    std::cout << functions[word].name << ":" << std::endl;
+                }
                 setCall(word);
             }
         }
@@ -132,9 +133,9 @@ VM::step() {
 void
 VM::runCall(uint32_t word) {
     
-#ifdef _DEBUG
-    std::cout << functions[word].name << ":" << std::endl;
-#endif
+    if( verboseDebugging ) {
+        std::cout << functions[word].name << ":" << std::endl;
+    }
 
     if( state != State::NO_ERROR ) {
         return;
@@ -205,7 +206,7 @@ VM::loadStream(IStream::Ptr strm) {
     streams.pop_back();
 }
 
-VM::VM() : wp(0), state(VM::State::NO_ERROR) {
+VM::VM() : wp(0), state(VM::State::NO_ERROR), verboseDebugging(false) {
     initPrimitives();
 }
 
@@ -278,6 +279,7 @@ VM::initPrimitives() {
 
         { ".s"          , Primitives::showValueStack, false },
         { "see"         , Primitives::see           , false },
+        { "deb.set"     , Primitives::setDebugMode  , false },
 
     };
 

@@ -24,10 +24,6 @@
 #include <cfloat>
 #include <cstdint>
 
-#ifndef _DEBUG
-#define _DEBUG
-#endif
-
 namespace Forth {
 
 struct IStream {
@@ -84,9 +80,8 @@ struct VM {
     typedef State   (*NativeFunction)(VM* vm);
 
     struct Function {
-#ifdef _DEBUG
-        std::string         name;
-#endif
+        std::string         name;           // keep this even in release for debugging purpose
+
         bool                isImmediate;
         NativeFunction      native;
         int32_t             start;
@@ -151,6 +146,10 @@ private:
 
     uint32_t                                    wp;             // instruction pointer
     State                                       state;
+
+    // debugging facilites
+    bool                                        verboseDebugging;
+
 
     friend struct   Primitives;
 };
@@ -220,6 +219,7 @@ struct Primitives {
     // debug helpers
     static VM::State    showValueStack  (VM* vm);
     static VM::State    see             (VM* vm);
+    static VM::State    setDebugMode    (VM* vm);
 };
 }
 

@@ -84,9 +84,9 @@ Primitives::defineWord(VM* vm) {
         uint32_t    wordId  = static_cast<uint32_t>(vm->functions.size());
 
         VM::Function    func;
-#ifdef _DEBUG
+
         func.name   = name;
-#endif
+
         func.start  = vm->words.size();
         vm->functions.push_back(func);
 
@@ -556,6 +556,14 @@ Primitives::see(VM *vm) {
 
     std::cout << std::endl;
 
+    return VM::State::NO_ERROR;
+}
+
+VM::State
+Primitives::setDebugMode(VM* vm) {
+    VM::Value v    = vm->top();
+    vm->pop();
+    vm->verboseDebugging    = v.u32 ? true : false;
     return VM::State::NO_ERROR;
 }
 

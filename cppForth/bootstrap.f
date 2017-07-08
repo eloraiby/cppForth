@@ -60,8 +60,12 @@
 
 : .cd
     repeat
+        dup
         @cd
         dup .c
+        swap
+        1 +
+        swap
     until ;
 
 : ." immediate
@@ -78,3 +82,11 @@
 : -1 1 - ;
 
 : testif 0 == if 123 . then 456 . ;
+
+: dec100
+    100
+    repeat
+        dup
+        .
+        1 -
+    until ;
