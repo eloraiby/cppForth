@@ -26,6 +26,8 @@
 
 namespace Forth {
 
+enum { MAX_BUFF = 1024 };
+
 struct IStream {
     typedef std::shared_ptr<IStream>    Ptr;
 
@@ -52,17 +54,22 @@ struct IStream {
 };
 
 struct VM {
-    enum class State {
-        NO_ERROR        =  0,
-        WORD_NOT_FOUND  = -1,
-        HALT            = -2,
-        VS_UNDERFLOW    = -3,
-        VS_OVERFLOW     = -4,
-        RS_UNDERFLOW    = -5,
-        RS_OVERFLOW     = -6,
-        WORD_NOT_DEFINED= -7,
-        INT_IS_NO_WORD  = -8,
-        WORD_ID_OUT_OF_RANGE    = -9,
+    enum class ErrorCase {
+        WORD_NOT_FOUND          = -1,
+        VS_UNDERFLOW            = -2,
+        VS_OVERFLOW             = -3,
+        RS_UNDERFLOW            = -4,
+        RS_OVERFLOW             = -5,
+        WORD_NOT_DEFINED        = -6,
+        INT_IS_NO_WORD          = -7,
+        WORD_ID_OUT_OF_RANGE    = -8,
+    };
+
+    struct Error {
+        ErrorCase               errorCase;
+        std::string             errorString;
+
+        Error(ErrorCase ec, const std::string& str) : errorCase(ec), errorString(str) {}
     };
 
     union Value {
@@ -77,7 +84,7 @@ struct VM {
         explicit Value(void* v)     : ptr(v) {}
     };
 
-    typedef State   (*NativeFunction)(VM* vm);
+    typedef void    (*NativeFunction)(VM* vm);
 
     struct Function {
         std::string         name;           // keep this even in release for debugging purpose
@@ -105,12 +112,10 @@ struct VM {
 
 
     inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(words.size()); words.push_back(word); return pos; }
-    inline void     setState(State s)           { state = s; }
-    inline State    getState() const            { return state; }
 
     uint32_t        addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate);
 
-    void            throwException(const std::string& string, State s);
+    void            throwException(ErrorCase err, const std::string& str);
 
     VM();
 
@@ -138,14 +143,13 @@ private:
     std::vector<Value>                          valueStack;     // contains values on the stack
     std::vector<uint32_t>                       returnStack;    // contains calling word pointer
     std::vector<uint32_t>                       callStack;      // contains current executing words
-    std::vector<State>                          exceptionStack; // exception stack
+    std::vector<Error>                          exceptionStack; // exception stack
 
     std::vector<IStream::Ptr>                   streams;
 
     std::vector<Value>                          constDataStack; // strings, names, ...
 
     uint32_t                                    wp;             // instruction pointer
-    State                                       state;
 
     // debugging facilites
     bool                                        verboseDebugging;
@@ -156,70 +160,70 @@ private:
 
 struct Primitives {
     // primitives
-    static VM::State    fetchInt32      (VM* vm);
-    static VM::State    returnWord      (VM* vm);
-    static VM::State    wordId          (VM* vm);
-    static VM::State    printInt32      (VM* vm);
-    static VM::State    printChar       (VM* vm);
-    static VM::State    defineWord      (VM* vm);
-    static VM::State    immediate       (VM* vm);
-    static VM::State    addInt32        (VM* vm);
-    static VM::State    subInt32        (VM* vm);
-    static VM::State    mulInt32        (VM* vm);
-    static VM::State    divInt32        (VM* vm);
-    static VM::State    modInt32        (VM* vm);
-    static VM::State    branch          (VM* vm);
-    static VM::State    branchIf        (VM* vm);
-    static VM::State    dup             (VM* vm);
-    static VM::State    drop            (VM* vm);
-    static VM::State    swap            (VM* vm);
-    static VM::State    codeSize        (VM* vm);
-    static VM::State    endWord         (VM* vm);
+    static void     fetchInt32      (VM* vm);
+    static void     returnWord      (VM* vm);
+    static void     wordId          (VM* vm);
+    static void     printInt32      (VM* vm);
+    static void     printChar       (VM* vm);
+    static void     defineWord      (VM* vm);
+    static void     immediate       (VM* vm);
+    static void     addInt32        (VM* vm);
+    static void     subInt32        (VM* vm);
+    static void     mulInt32        (VM* vm);
+    static void     divInt32        (VM* vm);
+    static void     modInt32        (VM* vm);
+    static void     branch          (VM* vm);
+    static void     branchIf        (VM* vm);
+    static void     dup             (VM* vm);
+    static void     drop            (VM* vm);
+    static void     swap            (VM* vm);
+    static void     codeSize        (VM* vm);
+    static void     endWord         (VM* vm);
 
-    static VM::State    emitReturn      (VM* vm);
-    static VM::State    emitWord        (VM* vm);
-    static VM::State    emitConstData   (VM* vm);
-    static VM::State    emitException   (VM* vm);
+    static void     emitReturn      (VM* vm);
+    static void     emitWord        (VM* vm);
+    static void     emitConstData   (VM* vm);
+    static void     emitException   (VM* vm);
 
-    static VM::State    streamPeek      (VM* vm);
-    static VM::State    streamGetCH     (VM* vm);
-    static VM::State    streamToken     (VM* vm);
+    static void     streamPeek      (VM* vm);
+    static void     streamGetCH     (VM* vm);
+    static void     streamToken     (VM* vm);
 
-    static VM::State    ieq             (VM* vm);
-    static VM::State    ineq            (VM* vm);
-    static VM::State    igt             (VM* vm);
-    static VM::State    ilt             (VM* vm);
-    static VM::State    igeq            (VM* vm);
-    static VM::State    ileq            (VM* vm);
-    static VM::State    notBW           (VM* vm);
-    static VM::State    andBW           (VM* vm);
-    static VM::State    orBW            (VM* vm);
+    static void     ieq             (VM* vm);
+    static void     ineq            (VM* vm);
+    static void     igt             (VM* vm);
+    static void     ilt             (VM* vm);
+    static void     igeq            (VM* vm);
+    static void     ileq            (VM* vm);
+    static void     notBW           (VM* vm);
+    static void     andBW           (VM* vm);
+    static void     orBW            (VM* vm);
 
     // machine stacks
-    static VM::State    vsPtr           (VM* vm);
-    static VM::State    rsPtr           (VM* vm);
-    static VM::State    wsPtr           (VM* vm);
-    static VM::State    cdsPtr          (VM* vm);
-    static VM::State    esPtr           (VM* vm);
+    static void     vsPtr           (VM* vm);
+    static void     rsPtr           (VM* vm);
+    static void     wsPtr           (VM* vm);
+    static void     cdsPtr          (VM* vm);
+    static void     esPtr           (VM* vm);
 
-    static VM::State    vsFetch         (VM* vm);
-    static VM::State    rsFetch         (VM* vm);
-    static VM::State    wsFetch         (VM* vm);
-    static VM::State    cdsFetch        (VM* vm);
-    static VM::State    esFetch         (VM* vm);
+    static void     vsFetch         (VM* vm);
+    static void     rsFetch         (VM* vm);
+    static void     wsFetch         (VM* vm);
+    static void     cdsFetch        (VM* vm);
+    static void     esFetch         (VM* vm);
 
-    static VM::State    vsStore         (VM* vm);
-    static VM::State    rsStore         (VM* vm);
-    static VM::State    wsStore         (VM* vm);
-    static VM::State    cdsStore        (VM* vm);
-    static VM::State    esStore         (VM* vm);
+    static void     vsStore         (VM* vm);
+    static void     rsStore         (VM* vm);
+    static void     wsStore         (VM* vm);
+    static void     cdsStore        (VM* vm);
+    static void     esStore         (VM* vm);
 
-    static VM::State    exit            (VM* vm);
+    static void     exit            (VM* vm);
 
     // debug helpers
-    static VM::State    showValueStack  (VM* vm);
-    static VM::State    see             (VM* vm);
-    static VM::State    setDebugMode    (VM* vm);
+    static void     showValueStack  (VM* vm);
+    static void     see             (VM* vm);
+    static void     setDebugMode    (VM* vm);
 };
 }
 

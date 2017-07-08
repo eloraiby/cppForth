@@ -16,6 +16,7 @@
 #include "forth.hpp"
 
 #include <iostream>
+#include <cstdio>
 
 namespace Forth {
 
@@ -26,7 +27,7 @@ VM::findWord(const std::string& name) {
     if( nameToWord.find(name) == nameToWord.end() ) {
         return nameToWord[name];
     } else { 
-        return static_cast<uint32_t>(State::WORD_NOT_FOUND);
+        return static_cast<uint32_t>(-1);
     } 
 }
 
@@ -95,56 +96,62 @@ VM::getToken() {
 
 void
 VM::step() {
-    if( state == State::NO_ERROR ) {
-        uint32_t    word    = words[wp];
+    uint32_t    word    = words[wp];
         
-        if( word > functions.size() ) {
-            state = State::WORD_NOT_FOUND;
+    if( word > functions.size() ) {
+        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segement");
+        return;
+    }
+
+    if( verboseDebugging ) {
+        std::cout << "    @" << wp << " -- " << functions[word].name;
+        if( word == 0 ) {
+            std::cout << " " << words[wp + 1];
+        }
+        std::cout << std::endl;
+    }
+
+    if( functions[word].native ) {
+        callStack.push_back(word);
+        functions[word].native(this);
+        callStack.pop_back();
+        ++wp;
+    } else {
+        if(  functions[word].start == -1 ) {
+            throwException(ErrorCase::WORD_NOT_DEFINED, "ERROR: word not defined");
             return;
-        }
-
-        if( verboseDebugging ) {
-            std::cout << "    @" << wp << " -- " << functions[word].name;
-            if( word == 0 ) {
-                std::cout << " " << words[wp + 1];
-            }
-            std::cout << std::endl;
-        }
-
-        if( functions[word].native ) {
-            callStack.push_back(word);
-            state = functions[word].native(this);
-            callStack.pop_back();
-            ++wp;
         } else {
-            if(  functions[word].start == -1 ) {
-                state = State::WORD_NOT_DEFINED;
-                return;
-            } else {
-                if( verboseDebugging ) {
-                    std::cout << functions[word].name << ":" << std::endl;
-                }
-                setCall(word);
+            if( verboseDebugging ) {
+                std::cout << functions[word].name << ":" << std::endl;
             }
+            setCall(word);
         }
     }
 }
 
 void
-VM::runCall(uint32_t word) {
-    
-    if( verboseDebugging ) {
-        std::cout << functions[word].name << ":" << std::endl;
-    }
+VM::throwException(ErrorCase err, const std::string& str) {
+    exceptionStack.push_back(Error(err, str));
 
-    if( state != State::NO_ERROR ) {
-        return;
-    }
+    std::cerr << str << std::endl;
+
+    // TODO: switch to debug stream (debugging stream)
+    popStream();
+    stream()->setMode(IStream::Mode::EVAL);
+}
+
+void
+VM::runCall(uint32_t word) {
+    size_t    startExceptionSize = exceptionStack.size();
 
     if( word > functions.size() ) {
-        std::cerr << "ERROR: word outside code segement" << std::endl;
-        state = State::WORD_NOT_FOUND;
+        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segement");
         return;
+    }
+
+    // IF verbose debugging AND IF function id exists
+    if( verboseDebugging ) {
+        std::cout << functions[word].name << ":" << std::endl;
     }
 
     if( functions[word].native ) {
@@ -154,7 +161,7 @@ VM::runCall(uint32_t word) {
 
         setCall(word);
 
-        while( returnStack.size() != rsPos && state == State::NO_ERROR ) {
+        while( returnStack.size() != rsPos && exceptionStack.size() <= startExceptionSize ) {
             step();
         }
     }
@@ -163,8 +170,9 @@ VM::runCall(uint32_t word) {
 void
 VM::loadStream(IStream::Ptr strm) {
     streams.push_back(strm);
+    size_t    startExceptionSize = exceptionStack.size();
 
-    while( stream()->peekChar() && state == State::NO_ERROR ) {
+    while( stream()->peekChar() && exceptionStack.size() <= startExceptionSize ) {
         std::string tok = getToken();
 
         switch( stream()->getMode() ) {
@@ -174,8 +182,9 @@ VM::loadStream(IStream::Ptr strm) {
                 valueStack.push_back(v);
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
-                    std::cerr << "ERROR: word not found (" << tok << ")" << std::endl;
-                    state = State::WORD_NOT_FOUND;
+                    char buff[MAX_BUFF] = {0};
+                    sprintf("ERROR: word not found (%s)", tok.c_str());
+                    throwException(ErrorCase::WORD_NOT_FOUND, buff);
                 } else {
                     runCall(nameToWord[tok]);
                 }
@@ -188,8 +197,9 @@ VM::loadStream(IStream::Ptr strm) {
                 emit(Value(toInt32(tok)).u32);
             } else {
                 if( nameToWord.find(tok) == nameToWord.end() ) {
-                    std::cerr << "ERROR: word not found (" << tok << ")" << std::endl;
-                    state = State::WORD_NOT_FOUND;
+                    char buff[MAX_BUFF] = {0};
+                    sprintf("ERROR: word not found (%s)", tok.c_str());
+                    throwException(ErrorCase::WORD_NOT_FOUND, buff);
                 } else {
                     uint32_t    word    = nameToWord[tok];
                     if( functions[word].isImmediate ) {
@@ -206,7 +216,7 @@ VM::loadStream(IStream::Ptr strm) {
     streams.pop_back();
 }
 
-VM::VM() : wp(0), state(VM::State::NO_ERROR), verboseDebugging(false) {
+VM::VM() : wp(0), verboseDebugging(false) {
     initPrimitives();
 }
 

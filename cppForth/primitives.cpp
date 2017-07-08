@@ -16,65 +16,64 @@
 #include "forth.hpp"
 
 #include <iostream>
+#include <cstdio>
 
 namespace Forth {
 
-VM::State
+void
 Primitives::fetchInt32(VM* vm) {
     int32_t    u   = vm->fetch();
     VM::Value   v(u);
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::returnWord(VM* vm) {
     vm->setRet();
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::wordId(VM* vm) {
     std::string name    = vm->getToken();
     
     if( vm->isInt(name) ) {
-        return VM::State::INT_IS_NO_WORD;
+        vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
+        return;
     }
 
     if( vm->nameToWord.find(name) == vm->nameToWord.end() ) {
-        std::cerr << "ERROR: word not found (" << name << ")" << std::endl;
-        return VM::State::WORD_NOT_FOUND;
+        char buff[MAX_BUFF] = {0};
+        sprintf(buff, "ERROR: word not found (%s)", name.c_str());
+        vm->throwException(VM::ErrorCase::WORD_NOT_FOUND, buff);
+        return;
     }
     
     uint32_t    wordId = vm->nameToWord[name];
     vm->emit(0);
     vm->emit(wordId);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::printInt32(VM* vm) {
     VM::Value   v   = vm->top();
     vm->pop();
     std::cout << v.i32 << std::endl;
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::printChar(VM* vm) {
     VM::Value   v   = vm->top();
     vm->pop();
     std::cout << static_cast<char>(v.i32);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::defineWord(VM* vm) {
 
     std::string name    = vm->getToken();
 
     if( VM::isInt(name) ) {
-        return VM::State::INT_IS_NO_WORD;
+        vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
     } else {
         //
         // TODO:    do we want to allow forward declaration ?
@@ -93,79 +92,69 @@ Primitives::defineWord(VM* vm) {
         vm->nameToWord[name]    = wordId;
         
         vm->stream()->setMode(IStream::Mode::COMPILE);
-
-        return VM::State::NO_ERROR;
     }
 }
 
-VM::State
+void
 Primitives::immediate(VM* vm) {
     vm->functions[vm->functions.size() - 1].isImmediate = true;
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::addInt32(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 + b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::subInt32(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 - b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::mulInt32(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 * b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::divInt32(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 / b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::modInt32(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 % b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::branch(VM* vm) {
 
     VM::Value addr  = vm->top();
     vm->pop();
 
     vm->setBranch(addr.i32 - 1);
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::branchIf(VM* vm) {
     VM::Value addr  = vm->top();
     vm->pop();
@@ -176,26 +165,20 @@ Primitives::branchIf(VM* vm) {
     if( cond.i32 != 0 ) {
         vm->setBranch(addr.i32 - 1);
     }
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::dup(VM* vm) {
     VM::Value val  = vm->top();
     vm->push(val);
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::drop(VM* vm) {
     vm->pop();
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::swap(VM* vm) {
     VM::Value v0  = vm->top();
     vm->pop();
@@ -205,257 +188,226 @@ Primitives::swap(VM* vm) {
 
     vm->push(v0);
     vm->push(v1);
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::codeSize(VM* vm) {
     VM::Value v(static_cast<int32_t>(vm->words.size()));
     vm->push(v);
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::endWord(VM* vm) {
     vm->stream()->setMode(IStream::Mode::EVAL);
     vm->emit(1);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::emitReturn(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
 
     vm->returnStack.push_back(v.u32);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::emitWord(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
     vm->emit(v.u32);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::emitConstData(VM* vm) {
     VM::Value v = vm->top();
     vm->pop();
 
     vm->constDataStack.push_back(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::emitException(VM* vm) {
     VM::Value v = vm->top();
     vm->pop();
 
-    vm->exceptionStack.push_back(static_cast<VM::State>(v.i32));
-    return VM::State::NO_ERROR;
+    vm->exceptionStack.push_back(VM::Error(static_cast<VM::ErrorCase>(v.i32), ""));
 }
 
-VM::State
+void
 Primitives::streamPeek(VM* vm) {
     // TODO: handle stream error (does not exist)
     VM::Value v(static_cast<uint32_t>(vm->stream()->peekChar()));
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::streamGetCH(VM* vm) {
     // TODO: handle stream error (does not exist)
     VM::Value v(static_cast<uint32_t>(vm->stream()->getChar()));
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::streamToken(VM* vm) {
     // TODO: when strings are ready
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::ieq(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value((a.i32 == b.i32) ? -1 : 0));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::ineq(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value((a.i32 != b.i32) ? -1 : 0));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::igt(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 > b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::ilt(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 < b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::igeq(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 >= b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::ileq(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.i32 <= b.i32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::notBW(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
 
     vm->push(VM::Value(!v.u32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::andBW(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.u32 & b.u32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::orBW(VM* vm) {
     VM::Value b   = vm->top();
     vm->pop();
     VM::Value a   = vm->top();
     vm->pop();
     vm->push(VM::Value(a.u32 | b.u32));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::vsPtr(VM *vm) {
     VM::Value v(static_cast<int32_t>(vm->valueStack.size()) - 1);
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::rsPtr(VM *vm) {
     VM::Value v(static_cast<int32_t>(vm->returnStack.size()) - 1);
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::wsPtr(VM *vm) {
     VM::Value v(static_cast<int32_t>(vm->words.size()) - 1);
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::cdsPtr(VM* vm) {
     VM::Value v(static_cast<int32_t>(vm->constDataStack.size()) - 1);
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::esPtr(VM* vm) {
     VM::Value v(static_cast<int32_t>(vm->exceptionStack.size()) - 1);
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::vsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
     VM::Value v = vm->valueStack[addr.i32];
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::rsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
     VM::Value v(static_cast<int32_t>(vm->returnStack[addr.i32]));
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::wsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
     VM::Value v(static_cast<int32_t>(vm->words[addr.i32]));
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::cdsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
     VM::Value v = vm->constDataStack[addr.i32];
     vm->push(v);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::esFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
-    VM::State v = vm->exceptionStack[addr.i32];
+    VM::ErrorCase v = vm->exceptionStack[addr.i32].errorCase;
     vm->push(VM::Value(static_cast<int32_t>(v)));
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::vsStore(VM *vm) {
     VM::Value addr  = vm->top();
     vm->pop();
@@ -464,10 +416,9 @@ Primitives::vsStore(VM *vm) {
     vm->pop();
 
     vm->valueStack[addr.i32] = v;
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::rsStore(VM *vm) {
     VM::Value addr  = vm->top();
     vm->pop();
@@ -476,10 +427,9 @@ Primitives::rsStore(VM *vm) {
     vm->pop();
 
     vm->returnStack[addr.i32] = v.u32;
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::wsStore(VM *vm) {
     VM::Value addr  = vm->top();
     vm->pop();
@@ -488,10 +438,9 @@ Primitives::wsStore(VM *vm) {
     vm->pop();
 
     vm->words[addr.i32] = v.u32;
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::cdsStore(VM *vm) {
     VM::Value addr  = vm->top();
     vm->pop();
@@ -500,10 +449,9 @@ Primitives::cdsStore(VM *vm) {
     vm->pop();
 
     vm->constDataStack[addr.i32] = v;
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::esStore(VM *vm) {
     VM::Value addr  = vm->top();
     vm->pop();
@@ -511,27 +459,24 @@ Primitives::esStore(VM *vm) {
     VM::Value v     = vm->top();
     vm->pop();
 
-    vm->exceptionStack[addr.i32] = static_cast<VM::State>(v.i32);
-    return VM::State::NO_ERROR;
+    vm->exceptionStack[addr.i32] = VM::Error(static_cast<VM::ErrorCase>(v.i32), "");
 }
 
-VM::State
+void
 Primitives::exit(VM *vm) {
     VM::Value ret    = vm->top();
     vm->pop();
     ::exit(ret.i32);
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::showValueStack(VM* vm) {
     for( size_t i = 0; i < vm->valueStack.size(); ++i ) {
         std::cout << "vs@" << i << " -- " << std::hex << vm->valueStack[i].u32 << std::dec << std::endl;
     }
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::see(VM *vm) {
     uint32_t    word    = vm->nameToWord[vm->getToken()];
     std::cout << "[" << word << "] : " << vm->functions[word].name << " ";
@@ -555,16 +500,13 @@ Primitives::see(VM *vm) {
     }
 
     std::cout << std::endl;
-
-    return VM::State::NO_ERROR;
 }
 
-VM::State
+void
 Primitives::setDebugMode(VM* vm) {
     VM::Value v    = vm->top();
     vm->pop();
     vm->verboseDebugging    = v.u32 ? true : false;
-    return VM::State::NO_ERROR;
 }
 
 }   // namespace forth

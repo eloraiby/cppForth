@@ -2,30 +2,30 @@
 
 : w.p+ w.p 1 + ;
 
-: repeat immediate
+: do immediate
     w.p+ ; 
 
-: until immediate
+: while immediate
     i32>w
     ' ?branch >w ;
 
 : ( immediate
-    repeat
+    do
         stream.getch dup
         0 =/=
         swap
         41 =/=
         and
-    until ;
+    while ;
 
 : \ immediate
-    repeat
+    do
         stream.getch dup
         0 =/=
         swap
         10 =/=
         and
-    until ; 
+    while ; 
 
 : if immediate ( cond -- )
     w.p+ 6 + i32>w
@@ -41,7 +41,7 @@
 
 : .readString
     cd.p 1 + i32>w
-    repeat
+    do
         stream.getch dup dup dup
         0 =/=
         swap
@@ -52,21 +52,21 @@
             dup 10 .c swap .c 10 .c
             >cd
         then
-    until
+    while
     0 >cd ; \ null terminate
 
 : " immediate
     .readString ;
 
 : .cd
-    repeat
+    do
         dup
         @cd
         dup .c
         swap
         1 +
         swap
-    until ;
+    while ;
 
 : ." immediate
     .readString
@@ -85,8 +85,11 @@
 
 : dec100
     100
-    repeat
+    do
         dup
         .
         1 -
-    until ;
+        dup
+        0 =/=
+    while
+    drop ;
