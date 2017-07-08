@@ -48,6 +48,7 @@ struct IStream {
     bool
     isSpace(uint32_t ch) {
         return (ch == static_cast<uint32_t>('\n')
+            || ch == static_cast<uint32_t>('\r')  // windows
             || ch == static_cast<uint32_t>('\t')
             || ch == static_cast<uint32_t>(' ')
             || ch == static_cast<uint32_t>('\a'));

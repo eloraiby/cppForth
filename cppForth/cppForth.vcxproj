@@ -146,6 +146,11 @@
   <ItemGroup>
     <ClInclude Include="forth.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="bootstrap.f">
+      <DeploymentContent>true</DeploymentContent>
+    </None>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
