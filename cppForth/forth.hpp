@@ -32,6 +32,7 @@ enum { MAX_BUFF = 1024 };
 
 struct IStream {
     typedef IntrusivePtr<IStream>    Ptr;
+    IStream() : count_(0) {}
 
     enum class Mode {
         COMPILE,
