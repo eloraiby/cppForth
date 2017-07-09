@@ -20,21 +20,18 @@
 #   include "base.hpp"
 #endif
 
-
+#include "intrusive-ptr.hpp"
 #include "vector.hpp"
 #include "string.hpp"
 #include "hash_map.hpp"
 #include <unordered_map>
-
-#include <memory>
-
 
 namespace Forth {
 
 enum { MAX_BUFF = 1024 };
 
 struct IStream {
-    typedef std::shared_ptr<IStream>    Ptr;
+    typedef IntrusivePtr<IStream>    Ptr;
 
     enum class Mode {
         COMPILE,
@@ -56,6 +53,13 @@ struct IStream {
             || ch == static_cast<uint32_t>(' ')
             || ch == static_cast<uint32_t>('\a'));
     }
+
+	inline void		grab() const			{ ++count_;		}
+	inline void		release() const			{ --count_; if( count_ == 0 ) { delete this; } }
+	inline size_t		getRefCount() const		{ return count_;	}
+
+private:
+    mutable uint32_t        count_;
 };
 
 struct VM {
@@ -68,6 +72,12 @@ struct VM {
         WORD_NOT_DEFINED        = -6,
         INT_IS_NO_WORD          = -7,
         WORD_ID_OUT_OF_RANGE    = -8,
+    };
+
+    enum class Signal {
+        NONE                    = 0,
+        KILL                    = -1,
+        ABORT                   = -2,
     };
 
     struct Error {
@@ -156,6 +166,8 @@ private:
 
     uint32_t                                    wp;             // instruction pointer
 
+    Signal                                      sig;
+
     // debugging facilites
     bool                                        verboseDebugging;
 
@@ -225,6 +237,7 @@ struct Primitives {
     static void     cdsStore        (VM* vm);
     static void     esStore         (VM* vm);
 
+    static void     bye             (VM* vm);
     static void     exit            (VM* vm);
 
     // debug helpers

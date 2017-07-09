@@ -49,5 +49,8 @@
     <ClInclude Include="hash_map.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="intrusive-ptr.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

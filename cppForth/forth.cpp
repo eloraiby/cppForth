@@ -155,14 +155,14 @@ VM::runCall(uint32_t word) {
         fprintf(stdout, "%s:\n", functions[word].name.c_str());
     }
 
-    if( functions[word].native ) {
+    if( functions[word].native && sig == Signal::NONE ) {
         functions[word].native(this);
     } else {
         uint32_t    rsPos   = returnStack.size();
 
         setCall(word);
 
-        while( returnStack.size() != rsPos && exceptionStack.size() <= startExceptionSize ) {
+        while( returnStack.size() != rsPos && exceptionStack.size() <= startExceptionSize && sig == Signal::NONE ) {
             step();
         }
     }
@@ -173,7 +173,7 @@ VM::loadStream(IStream::Ptr strm) {
     streams.push_back(strm);
     size_t    startExceptionSize = exceptionStack.size();
 
-    while( stream()->peekChar() && exceptionStack.size() <= startExceptionSize ) {
+    while( stream()->peekChar() && exceptionStack.size() <= startExceptionSize && sig == Signal::NONE ) {
         String tok = getToken();
 
         switch( stream()->getMode() ) {
@@ -217,7 +217,7 @@ VM::loadStream(IStream::Ptr strm) {
     streams.pop_back();
 }
 
-VM::VM() : wp(0), verboseDebugging(false) {
+VM::VM() : wp(0), sig(Signal::NONE), verboseDebugging(false) {
     initPrimitives();
 }
 
@@ -286,7 +286,8 @@ VM::initPrimitives() {
         { "!w"          , Primitives::wsStore       , false },
         { "!cd"         , Primitives::cdsStore      , false },
         { "!e"          , Primitives::esStore       , false },
-
+        
+        { "bye"         , Primitives::bye           , false },
         { "exit"        , Primitives::exit          , false },
 
         { ".s"          , Primitives::showValueStack, false },

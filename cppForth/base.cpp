@@ -25,3 +25,12 @@ uint32_t __forth_reverse_hash_string__(const char* str)
 
 	return seed;
 }
+
+void*	operator new(size_t s)		            NOEXCEPT { return malloc(s);    }
+void    operator delete(void* p)	            NOEXCEPT { return free(p);      }
+void*	operator new[](size_t s)	            NOEXCEPT { return malloc(s);    }
+void    operator delete[](void* p)	            NOEXCEPT { return free(p);      }
+void*	operator new(size_t /*s*/, void* p)	    NOEXCEPT { return p;            }
+void*	operator new[](size_t /*s*/, void* p)	NOEXCEPT { return p;            }
+void	operator delete(void* , void* p)	    NOEXCEPT { }
+void	operator delete[](void* , void* p)	    NOEXCEPT { }
