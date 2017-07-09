@@ -22,7 +22,7 @@ namespace Forth {
 IStream::~IStream() {}
 
 int32_t
-VM::findWord(const std::string& name) {
+VM::findWord(const String& name) {
     if( nameToWord.find(name) == nameToWord.end() ) {
         return nameToWord[name];
     } else { 
@@ -31,7 +31,7 @@ VM::findWord(const std::string& name) {
 }
 
 uint32_t
-VM::addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate) {
+VM::addNativeFunction(const String& name, NativeFunction native, bool isImmediate) {
     uint32_t    wordId  = static_cast<uint32_t>(functions.size());
     Function    func;
 
@@ -51,7 +51,7 @@ VM::addNativeFunction(const std::string& name, NativeFunction native, bool isImm
 // parsing & runtime
 ////////////////////////////////////////////////////////////////////////////////
 bool
-VM::isInt(const std::string& tok) {
+VM::isInt(const String& tok) {
     uint32_t    pos = 0;
     
     while( pos < tok.size() ) {
@@ -66,7 +66,7 @@ VM::isInt(const std::string& tok) {
 }
 
 int32_t
-VM::toInt32(const std::string& tok) {
+VM::toInt32(const String& tok) {
     uint32_t    pos = 0;
     uint32_t    val = 0;
     
@@ -78,9 +78,9 @@ VM::toInt32(const std::string& tok) {
     return val;
 }
 
-std::string
+String
 VM::getToken() {
-    std::string ret;
+    String ret;
     
     // remove white space
     while( stream()->peekChar() && IStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
@@ -127,7 +127,7 @@ VM::step() {
 }
 
 void
-VM::throwException(ErrorCase err, const std::string& str) {
+VM::throwException(ErrorCase err, const String& str) {
     exceptionStack.push_back(Error(err, str));
 
     fprintf(stderr, "%s\n", str.c_str());
@@ -174,7 +174,7 @@ VM::loadStream(IStream::Ptr strm) {
     size_t    startExceptionSize = exceptionStack.size();
 
     while( stream()->peekChar() && exceptionStack.size() <= startExceptionSize ) {
-        std::string tok = getToken();
+        String tok = getToken();
 
         switch( stream()->getMode() ) {
         case IStream::Mode::EVAL:

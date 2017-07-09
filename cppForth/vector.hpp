@@ -1,18 +1,3 @@
-/* 
-** Copyright (c) 2017 Wael El Oraiby.
-** 
-** This program is free software: you can redistribute it and/or modify  
-** it under the terms of the GNU Lesser General Public License as   
-** published by the Free Software Foundation, version 3.
-**
-** This program is distributed in the hope that it will be useful, but 
-** WITHOUT ANY WARRANTY; without even the implied warranty of 
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
-** Lesser General Lesser Public License for more details.
-**
-** You should have received a copy of the GNU Lesser General Public License
-** along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
 #ifndef VECTOR_HPP
 #define VECTOR_HPP
 ///
@@ -24,28 +9,23 @@
 namespace Forth
 {
 
-struct VectorBase {
-    size_t			count_;
-    size_t			reserved_;
-    void*           data_;
-
-    VectorBase(size_t count, size_t reserved, void* data) : count_(count), reserved_(reserved), data_(data) {}
-};
-
 template<typename T>
-struct Vector : protected VectorBase
+struct Vector
 {
 private:
 	enum
 	{
         MIN_VEC_RES_SIZE_	= 4
 	};
+    size_t			count_;
+    size_t			reserved_;
+    T*              data_;
 
 public:
-    Vector() : VectorBase(0, MIN_VEC_RES_SIZE_, malloc(sizeof(T) * MIN_VEC_RES_SIZE_)) {
+    Vector() : count_(0), reserved_(MIN_VEC_RES_SIZE_), data_(static_cast<T*>(malloc(sizeof(T) * MIN_VEC_RES_SIZE_))) {
 	}
 
-    Vector(size_t n, const T* elems) : VectorBase(n, n ? n : MIN_VEC_RES_SIZE_, malloc(sizeof(T) * (n ? n : MIN_VEC_RES_SIZE_))) {
+    Vector(size_t n, const T* elems) : count_(n), reserved_(n ? n : MIN_VEC_RES_SIZE_), data_(static_cast<T*>(malloc(sizeof(T) * (n ? n : MIN_VEC_RES_SIZE_)))) {
 		if( n ) {
             T*  data    = static_cast<T*>(data_);
             for( size_t i = 0; i < count_; ++i ) {
@@ -118,7 +98,7 @@ public:
         reserved_	= v.reserved_;
         count_		= v.count_;
 
-        data_		= malloc(sizeof(T) * reserved_);
+        data_		= static_cast<T*>(malloc(sizeof(T) * reserved_));
         T*  data    = static_cast<T*>(data_);
         const T*  vData    = static_cast<const T*>(v.data_);
         for( size_t i = 0; i < count_; ++i )
@@ -126,8 +106,8 @@ public:
 		return *this;
 	}
 
-    Vector(const Vector<T>& v) : VectorBase(v.count_, v.reserved_, nullptr) {
-        data_		= malloc(sizeof(T) * reserved_);
+    Vector(const Vector<T>& v) : count_(v.count_), reserved_(v.reserved_), data_(nullptr) {
+        data_		= static_cast<T*>(malloc(sizeof(T) * reserved_));
         T*  data    = static_cast<T*>(data_);
         const T*  vData    = static_cast<const T*>(v.data_);
 

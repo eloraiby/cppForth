@@ -16,14 +16,17 @@
 #ifndef __FORTH__HPP__
 #define __FORTH__HPP__
 
-#include <unordered_map>
-
-#include <string>
 #include <memory>
 
-#include <cfloat>
-#include <cstdint>
+
+
+#ifndef __FORTH_BASE__
+#   include "base.hpp"
+#endif
+
 #include "vector.hpp"
+#include "string.hpp"
+#include "hash_map.hpp"
 
 namespace Forth {
 
@@ -68,9 +71,9 @@ struct VM {
 
     struct Error {
         ErrorCase               errorCase;
-        std::string             errorString;
+        String                  errorString;
 
-        Error(ErrorCase ec, const std::string& str) : errorCase(ec), errorString(str) {}
+        Error(ErrorCase ec, const String& str) : errorCase(ec), errorString(str) {}
     };
 
     union Value {
@@ -88,7 +91,7 @@ struct VM {
     typedef void    (*NativeFunction)(VM* vm);
 
     struct Function {
-        std::string         name;           // keep this even in release for debugging purpose
+        String              name;           // keep this even in release for debugging purpose
 
         bool                isImmediate;
         NativeFunction      native;
@@ -97,7 +100,7 @@ struct VM {
         Function() : isImmediate(false), native(nullptr), start(-1) {}
     };
 
-    int32_t         findWord(const std::string& name);
+    int32_t         findWord(const String& name);
     void            loadStream(IStream::Ptr stream);
 
 
@@ -107,16 +110,16 @@ struct VM {
     inline Value    top() const                 { return valueStack.back(); }
     inline void     pop()                       { valueStack.pop_back(); }
 
-    std::string     getToken();
+    String          getToken();
     void            step();
     void            runCall(uint32_t word);
 
 
     inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(words.size()); words.push_back(word); return pos; }
 
-    uint32_t        addNativeFunction(const std::string& name, NativeFunction native, bool isImmediate);
+    uint32_t        addNativeFunction(const String& name, NativeFunction native, bool isImmediate);
 
-    void            throwException(ErrorCase err, const std::string& str);
+    void            throwException(ErrorCase err, const String& str);
 
     VM();
 
@@ -133,11 +136,11 @@ private:
 
     void            initPrimitives();
 
-    static bool     isInt(const std::string& tok);
-    static int32_t  toInt32(const std::string& tok);
+    static bool     isInt(const String& tok);
+    static int32_t  toInt32(const String& tok);
 
     Vector<Function>                            functions;
-    std::unordered_map<std::string, uint32_t>   nameToWord;
+    HashMap<String, uint32_t>                   nameToWord;
 
     Vector<uint32_t>                            words;          // the code segment
 

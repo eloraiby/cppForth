@@ -33,7 +33,7 @@ Primitives::returnWord(VM* vm) {
 
 void
 Primitives::wordId(VM* vm) {
-    std::string name    = vm->getToken();
+    String name    = vm->getToken();
     
     if( vm->isInt(name) ) {
         vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
@@ -78,7 +78,7 @@ Primitives::printChar(VM* vm) {
 void
 Primitives::defineWord(VM* vm) {
 
-    std::string name    = vm->getToken();
+    String name    = vm->getToken();
 
     if( VM::isInt(name) ) {
         vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");

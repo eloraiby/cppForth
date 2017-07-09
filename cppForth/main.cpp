@@ -59,7 +59,7 @@ struct StdStream : public Forth::IStream {
 
     Mode        mode;
     uint32_t    pos;
-    std::string buff;
+    Forth::String   buff;
 };
 
 struct StringStream : public Forth::IStream {
@@ -100,10 +100,10 @@ struct StringStream : public Forth::IStream {
 
     Mode        mode;
     uint32_t    pos;
-    std::string buff;
+    Forth::String buff;
 };
 
-std::string
+Forth::String
 readFile(const char* filename) {
     FILE* f = fopen(filename, "rb");
     if( f == nullptr ) {
@@ -120,7 +120,7 @@ readFile(const char* filename) {
 
     fclose(f);
 
-    std::string ret(buff);
+    Forth::String ret(buff);
     delete[] buff;
 
     return ret;
@@ -130,7 +130,7 @@ int
 main(int argc, char* argv[]) {
     Forth::VM*  vm  = new Forth::VM();
 
-    std::string core    = readFile("bootstrap.f");
+    Forth::String core    = readFile("bootstrap.f");
 
     Forth::IStream::Ptr coreStream(new StringStream(core.c_str()));
     vm->loadStream(coreStream);
