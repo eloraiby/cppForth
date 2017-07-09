@@ -257,8 +257,8 @@ void
 HashMap<K, V>::remove(const K& key) {
     uint32_t    hash = Hash<K>::hash(key) & 0x7FFFFFFF;
     uint32_t    ptrPosition = hash % capacity;
-    elptr_t     oldPtr = pointers[ptrPosition];
-    elptr_t     prevPos = EPtr::endPtr();
+    EPtr        oldPtr = pointers[ptrPosition];
+    EPtr        prevPos = EPtr::endPtr();
     
     while( oldPtr != EPtr::endPtr() && elements[oldPtr.getPtr()].key != key ) {
         prevPos = oldPtr;

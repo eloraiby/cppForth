@@ -57,14 +57,30 @@
 #	define NOEXCEPT noexcept
 #endif
 
-FORTH_API void*	operator new(size_t s)		            NOEXCEPT;
-FORTH_API void	operator delete(void* p)	            NOEXCEPT;
-FORTH_API void*	operator new[](size_t s)	            NOEXCEPT;
-FORTH_API void	operator delete[](void* p)	            NOEXCEPT;
-FORTH_API void*	operator new(size_t /*s*/, void* p)	    NOEXCEPT;
-FORTH_API void*	operator new[](size_t /*s*/, void* p)	NOEXCEPT;
-FORTH_API void	operator delete(void* , void* p)	    NOEXCEPT;
-FORTH_API void	operator delete[](void* , void* p)	    NOEXCEPT;
+#ifdef __GNUC__
+#   define _NEW
+namespace std {
+struct nothrow_t
+{
+  explicit nothrow_t() = default;
+};
+
+extern const nothrow_t nothrow;
+}   // namespace std
+
+#endif
+
+inline void*	operator new(size_t s)		            NOEXCEPT { return malloc(s);    }
+inline void	operator delete(void* p)	            NOEXCEPT { return free(p);      }
+inline void*	operator new[](size_t s)	            NOEXCEPT { return malloc(s);    }
+inline void	operator delete[](void* p)	            NOEXCEPT { return free(p);      }
+inline void*	operator new(size_t /*s*/, void* p)	    NOEXCEPT { return p;            }
+inline void*	operator new[](size_t /*s*/, void* p)	NOEXCEPT { return p;            }
+inline void	operator delete(void* , void* p)	    NOEXCEPT { }
+inline void	operator delete[](void* , void* p)	    NOEXCEPT { }
+
+inline void*	operator new(size_t s, const std::nothrow_t&)   NOEXCEPT { return malloc(s);    }
+
 
 namespace Forth {
 

@@ -16,17 +16,17 @@
 #ifndef __FORTH__HPP__
 #define __FORTH__HPP__
 
-#include <memory>
-
-
-
 #ifndef __FORTH_BASE__
 #   include "base.hpp"
 #endif
 
+
 #include "vector.hpp"
 #include "string.hpp"
 #include "hash_map.hpp"
+
+#include <memory>
+
 
 namespace Forth {
 
