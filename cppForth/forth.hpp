@@ -163,6 +163,8 @@ struct Primitives {
     static void     fetchInt32      (VM* vm);
     static void     returnWord      (VM* vm);
     static void     wordId          (VM* vm);
+    static void     callIndirect    (VM* vm);
+
     static void     printInt32      (VM* vm);
     static void     printChar       (VM* vm);
     static void     defineWord      (VM* vm);

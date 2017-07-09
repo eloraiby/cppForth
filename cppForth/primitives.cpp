@@ -54,6 +54,15 @@ Primitives::wordId(VM* vm) {
 }
 
 void
+Primitives::callIndirect(VM* vm) {
+    VM::Value   u   = vm->top();
+    vm->pop();
+
+    vm->setCall(u.u32);
+    --vm->wp;   // once outside the native, wp will get incremented, so decrement to stay at the start of the word
+}
+
+void
 Primitives::printInt32(VM* vm) {
     VM::Value   v   = vm->top();
     vm->pop();

@@ -99,7 +99,7 @@ VM::step() {
     uint32_t    word    = words[wp];
         
     if( word > functions.size() ) {
-        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segement");
+        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
         return;
     }
 
@@ -112,9 +112,7 @@ VM::step() {
     }
 
     if( functions[word].native ) {
-        callStack.push_back(word);
         functions[word].native(this);
-        callStack.pop_back();
         ++wp;
     } else {
         if(  functions[word].start == -1 ) {
@@ -135,6 +133,10 @@ VM::throwException(ErrorCase err, const std::string& str) {
 
     std::cerr << str << std::endl;
 
+    for( int i = callStack.size() - 1; i >= 0 ; --i ) {
+        std::cerr << "\t@[" << callStack[i] << "] - " << functions[callStack[i]].name << std::endl;
+    }
+
     // TODO: switch to debug stream (debugging stream)
     // popStream();
     stream()->setMode(IStream::Mode::EVAL);
@@ -145,7 +147,7 @@ VM::runCall(uint32_t word) {
     size_t    startExceptionSize = exceptionStack.size();
 
     if( word > functions.size() ) {
-        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segement");
+        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
         return;
     }
 
@@ -235,6 +237,7 @@ VM::initPrimitives() {
         { "lit.i32"     , Primitives::fetchInt32    , false },
         { "return"      , Primitives::returnWord    , false },
         { "'"           , Primitives::wordId        , true  },
+        { "#"           , Primitives::callIndirect  , false },
         { ":"           , Primitives::defineWord    , false },
         { "immediate"   , Primitives::immediate     , true  },
         { "."           , Primitives::printInt32    , false },
