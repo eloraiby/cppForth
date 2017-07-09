@@ -21,10 +21,9 @@
 namespace Forth {
 
 template<typename K, typename V>
-struct HashMap {
+struct HashMap : public NonCopyable {
 
     HashMap();
-    HashMap(const HashMap& other);
     ~HashMap();
 
     struct EPtr {

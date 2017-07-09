@@ -20,20 +20,17 @@
 #   include "base.hpp"
 #endif
 
-
+#include "intrusive-ptr.hpp"
 #include "vector.hpp"
 #include "string.hpp"
 #include "hash_map.hpp"
-
-#include <memory>
-
 
 namespace Forth {
 
 enum { MAX_BUFF = 1024 };
 
 struct IStream {
-    typedef std::shared_ptr<IStream>    Ptr;
+    typedef IntrusivePtr<IStream>    Ptr;
 
     enum class Mode {
         COMPILE,
@@ -55,6 +52,13 @@ struct IStream {
             || ch == static_cast<uint32_t>(' ')
             || ch == static_cast<uint32_t>('\a'));
     }
+
+	inline void		grab() const			{ ++count_;		}
+	inline void		release() const			{ --count_; if( count_ == 0 ) { delete this; } }
+	inline size_t		getRefCount() const		{ return count_;	}
+
+private:
+    mutable uint32_t        count_;
 };
 
 struct VM {

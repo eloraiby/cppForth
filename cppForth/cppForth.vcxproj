@@ -153,6 +153,7 @@
     <ClInclude Include="base.hpp" />
     <ClInclude Include="forth.hpp" />
     <ClInclude Include="hash_map.hpp" />
+    <ClInclude Include="intrusive-ptr.hpp" />
     <ClInclude Include="string.hpp" />
     <ClInclude Include="vector.hpp" />
   </ItemGroup>
