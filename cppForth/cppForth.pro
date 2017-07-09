@@ -16,4 +16,5 @@ HEADERS += \
     hash_map.hpp \
     base.hpp \
     string.hpp \
-    vector.hpp
+    vector.hpp \
+    intrusive-ptr.hpp
