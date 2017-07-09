@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="forth.hpp" />
+    <ClInclude Include="vector.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bootstrap.f">

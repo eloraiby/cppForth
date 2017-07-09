@@ -26,13 +26,16 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="forth.hpp">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="bootstrap.f">
       <Filter>Source Files</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="forth.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="vector.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

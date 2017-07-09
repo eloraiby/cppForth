@@ -17,13 +17,13 @@
 #define __FORTH__HPP__
 
 #include <unordered_map>
-#include <vector>
 
 #include <string>
 #include <memory>
 
 #include <cfloat>
 #include <cstdint>
+#include "vector.hpp"
 
 namespace Forth {
 
@@ -136,19 +136,19 @@ private:
     static bool     isInt(const std::string& tok);
     static int32_t  toInt32(const std::string& tok);
 
-    std::vector<Function>                       functions;
+    Vector<Function>                            functions;
     std::unordered_map<std::string, uint32_t>   nameToWord;
 
-    std::vector<uint32_t>                       words;          // the code segment
+    Vector<uint32_t>                            words;          // the code segment
 
-    std::vector<Value>                          valueStack;     // contains values on the stack
-    std::vector<uint32_t>                       returnStack;    // contains calling word pointer
-    std::vector<uint32_t>                       callStack;      // contains current executing words
-    std::vector<Error>                          exceptionStack; // exception stack
+    Vector<Value>                               valueStack;     // contains values on the stack
+    Vector<uint32_t>                            returnStack;    // contains calling word pointer
+    Vector<uint32_t>                            callStack;      // contains current executing words
+    Vector<Error>                               exceptionStack; // exception stack
 
-    std::vector<IStream::Ptr>                   streams;
+    Vector<IStream::Ptr>                        streams;
 
-    std::vector<Value>                          constDataStack; // strings, names, ...
+    Vector<Value>                               constDataStack; // strings, names, ...
 
     uint32_t                                    wp;             // instruction pointer
 
