@@ -75,14 +75,14 @@ inline void*	operator new(size_t s, const std::nothrow_t&)   NOEXCEPT { return m
 // TODO: use this ?
 // #include <new>
 
-inline void*	operator new(size_t s)		            NOEXCEPT { return malloc(s);    }
-inline void	    operator delete(void* p)	            NOEXCEPT { return free(p);      }
-inline void*	operator new[](size_t s)	            NOEXCEPT { return malloc(s);    }
-inline void	    operator delete[](void* p)	            NOEXCEPT { return free(p);      }
-inline void*	operator new(size_t /*s*/, void* p)	    NOEXCEPT { return p;            }
-inline void*	operator new[](size_t /*s*/, void* p)	NOEXCEPT { return p;            }
-inline void	    operator delete(void* , void* p)	    NOEXCEPT { }
-inline void	    operator delete[](void* , void* p)	    NOEXCEPT { }
+FORTH_API void*	operator new(size_t s)		            NOEXCEPT;
+FORTH_API void	operator delete(void* p)	            NOEXCEPT;
+FORTH_API void*	operator new[](size_t s)	            NOEXCEPT;
+FORTH_API void	operator delete[](void* p)	            NOEXCEPT;
+FORTH_API void*	operator new(size_t /*s*/, void* p)	    NOEXCEPT;
+FORTH_API void*	operator new[](size_t /*s*/, void* p)	NOEXCEPT;
+FORTH_API void	operator delete(void* , void* p)	    NOEXCEPT;
+FORTH_API void	operator delete[](void* , void* p)	    NOEXCEPT;
 
 
 
