@@ -15,7 +15,6 @@
 */
 #include "forth.hpp"
 
-#include <iostream>
 #include <cstdio>
 
 namespace Forth {
@@ -104,11 +103,11 @@ VM::step() {
     }
 
     if( verboseDebugging ) {
-        std::cout << "    @" << wp << " -- " << functions[word].name;
+        fprintf(stdout, "    @%d -- %s", wp, functions[word].name.c_str());
         if( word == 0 ) {
-            std::cout << " " << words[wp + 1];
+            fprintf(stdout, " %d", words[wp + 1]);
         }
-        std::cout << std::endl;
+        fprintf(stdout, "\n");
     }
 
     if( functions[word].native ) {
@@ -120,7 +119,7 @@ VM::step() {
             return;
         } else {
             if( verboseDebugging ) {
-                std::cout << functions[word].name << ":" << std::endl;
+                fprintf(stdout, "%s:\n", functions[word].name.c_str());
             }
             setCall(word);
         }
@@ -131,10 +130,10 @@ void
 VM::throwException(ErrorCase err, const std::string& str) {
     exceptionStack.push_back(Error(err, str));
 
-    std::cerr << str << std::endl;
+    fprintf(stderr, "%s\n", str.c_str());
 
     for( int i = callStack.size() - 1; i >= 0 ; --i ) {
-        std::cerr << "\t@[" << callStack[i] << "] - " << functions[callStack[i]].name << std::endl;
+        fprintf(stderr, "\t@[%d] - %s\n", callStack[i], functions[callStack[i]].name.c_str());
     }
 
     // TODO: switch to debug stream (debugging stream)
@@ -153,7 +152,7 @@ VM::runCall(uint32_t word) {
 
     // IF verbose debugging AND IF function id exists
     if( verboseDebugging ) {
-        std::cout << functions[word].name << ":" << std::endl;
+        fprintf(stdout, "%s:\n", functions[word].name.c_str());
     }
 
     if( functions[word].native ) {

@@ -14,7 +14,6 @@
 ** along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <iostream>
 #include "forth.hpp"
 
 #include <cstdio>
@@ -23,10 +22,10 @@ struct StdStream : public Forth::IStream {
     void
     testAndFillBuffer() {
         if(pos >= buff.size()) {
-            std::string tmp;
-            std::cin >> tmp;
-            tmp += '\n';
+            char tmp[8192] = {0};
+            scanf("%s", tmp);
             buff += tmp;
+            buff += '\n';
         }
     }
 

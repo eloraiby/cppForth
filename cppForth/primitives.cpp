@@ -15,7 +15,6 @@
 */
 #include "forth.hpp"
 
-#include <iostream>
 #include <cstdio>
 
 namespace Forth {
@@ -66,14 +65,14 @@ void
 Primitives::printInt32(VM* vm) {
     VM::Value   v   = vm->top();
     vm->pop();
-    std::cout << v.i32 << std::endl;
+    fprintf(stdout, "%d\n", v.i32);
 }
 
 void
 Primitives::printChar(VM* vm) {
     VM::Value   v   = vm->top();
     vm->pop();
-    std::cout << static_cast<char>(v.i32);
+    fprintf(stdout, "%c", static_cast<char>(v.i32));
 }
 
 void
@@ -481,23 +480,23 @@ Primitives::exit(VM *vm) {
 void
 Primitives::showValueStack(VM* vm) {
     for( size_t i = 0; i < vm->valueStack.size(); ++i ) {
-        std::cout << "vs@" << i << " -- " << std::hex << vm->valueStack[i].u32 << std::dec << std::endl;
+        fprintf(stdout, "vs@%d -- 0x%X\n", i, vm->valueStack[i].u32);
     }
 }
 
 void
 Primitives::see(VM *vm) {
     uint32_t    word    = vm->nameToWord[vm->getToken()];
-    std::cout << "[" << word << "] : " << vm->functions[word].name << " ";
+    fprintf(stdout, "[%d] : %s ", word, vm->functions[word].name.c_str());
     if( vm->functions[word].native ) {
-         std::cout << " <native> ";
+         fprintf(stdout, " <native> ");
     } else {
         int32_t     curr    = vm->functions[word].start;
         while( vm->words[curr] != 1 ) {
             if( vm->words[curr] == 0 ) {
-                std::cout << vm->words[++curr] << " ";
+                fprintf(stdout, "%d ", vm->words[++curr]);
             } else {
-                std::cout << "@" << curr << ":" << vm->functions[vm->words[curr]].name << " ";
+                fprintf(stdout, "@%d:%s ", curr, vm->functions[vm->words[curr]].name.c_str());
             }
 
             ++curr;
@@ -505,10 +504,10 @@ Primitives::see(VM *vm) {
     }
 
     if( vm->functions[word].isImmediate ) {
-        std::cout << "immediate";
+        fprintf(stdout, "immediate");
     }
 
-    std::cout << std::endl;
+    fprintf(stdout, "\n");
 }
 
 void
