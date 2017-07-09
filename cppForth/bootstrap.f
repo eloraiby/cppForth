@@ -1,3 +1,5 @@
+: _sink_ 0 0 0 0 ;
+
 : i32>w ' lit.i32 >w >w ;
 
 : do immediate
@@ -26,16 +28,20 @@
     while ; 
 
 : if immediate ( cond -- )
-    w.p 7 + i32>w
+    w.p 7 + i32>w   \ then addr
     ' ?branch >w
     w.p 2 +
-    0 i32>w
+    0 i32>w         \ else addr
     ' branch >w ; 
 
 : then immediate
     w.p 1 + swap !w ;
     
-: else ; immediate
+: else immediate
+    w.p 4 + swap !w \ set the else addr in IF after the coming branch
+    w.p 2 +
+    0 i32>w
+    ' branch >w ;
 
 : .readString
     cd.p 1 + i32>w
@@ -79,7 +85,9 @@
 
 : -1 1 - ;
 
-: testif 0 == if 123 . then 456 . ;
+: testifelse 0 == if 123 . then 456 . ;
+
+: testifthenelse 0 == if 123 . else 456 . then 789 . ;
 
 : dec100
     100
