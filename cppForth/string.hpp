@@ -150,13 +150,31 @@ struct String
 	inline size_t		length() const	{	return __data.size() - 1;	}
 	inline size_t		size() const	{	return __data.size() - 1;	}
 
-	inline char		operator[] (size_t i) const	{		return __data[i];	}
+	inline char         operator[] (size_t i) const	{		return __data[i];	}
 	inline char&		operator[] (size_t i)		{		return __data[i];	}
 
-	inline const char*	c_str() const			{	return &(__data[0]);		}
-	inline void*		operator new(size_t s)		{	return malloc(s);		}
-	inline void		operator delete(void* p)	{		return free(p);	}
-	inline void*		operator new(size_t /*s*/, void* p)	{	return p;	}
+	inline const char*	c_str() const			    {	return &(__data[0]);		}
+
+
+	void*
+	operator new(size_t s) {
+		return malloc(s);
+	}
+
+	void
+	operator delete(void* p) {
+		return free(p);
+	}
+
+	void*
+	operator new(size_t /* s */, void* p) {
+		return p;
+	}
+
+	void
+	operator delete(void* /* p */, void*) {
+		return;
+	}
 
 private:
 	Vector<char>		__data;		///< the actual string data

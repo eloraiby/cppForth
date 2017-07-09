@@ -41,11 +41,11 @@
 #   define CRT_API FORTH_API
 #endif
 
-#include <cfloat>
-#include <cstdint>
-#include <cstring>
+#include <float.h>
+#include <stdint.h>
+#include <string.h>
 #include <malloc.h>
-#include <cassert>
+#include <assert.h>
 
 #ifdef _MSC_VER
 #	if !_HAS_EXCEPTIONS
@@ -68,23 +68,11 @@ struct nothrow_t
 extern const nothrow_t nothrow;
 }   // namespace std
 
-inline void*	operator new(size_t s, const std::nothrow_t&)   NOEXCEPT { return malloc(s);    }
+//inline void*	operator new(size_t s, const std::nothrow_t&)   NOEXCEPT { return malloc(s);    }
 
 #endif
 
-// TODO: use this ?
-// #include <new>
-
-FORTH_API void*	operator new(size_t s)		            NOEXCEPT;
-FORTH_API void	operator delete(void* p)	            NOEXCEPT;
-FORTH_API void*	operator new[](size_t s)	            NOEXCEPT;
-FORTH_API void	operator delete[](void* p)	            NOEXCEPT;
-FORTH_API void*	operator new(size_t /*s*/, void* p)	    NOEXCEPT;
-FORTH_API void*	operator new[](size_t /*s*/, void* p)	NOEXCEPT;
-FORTH_API void	operator delete(void* , void* p)	    NOEXCEPT;
-FORTH_API void	operator delete[](void* , void* p)	    NOEXCEPT;
-
-
+#include <new>
 
 namespace Forth {
 

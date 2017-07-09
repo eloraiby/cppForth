@@ -61,6 +61,27 @@ struct HashMap : public NonCopyable {
         return *getValue(k);
     }
 
+
+	void*
+	operator new(size_t s) {
+		return malloc(s);
+	}
+
+	void
+	operator delete(void* p) {
+		return free(p);
+	}
+
+	void*
+	operator new(size_t /* s */, void* p) {
+		return p;
+	}
+
+	void
+	operator delete(void* /* p */, void*) {
+		return;
+	}
+
 private:
     enum {
         ENDPTR = -1,
@@ -92,6 +113,7 @@ private:
     EPtr*           allocatePointers(uint32_t size);
 
     void            rehash(uint32_t newSize);
+
 };
 
 template<typename K, typename V>

@@ -15,7 +15,7 @@
 */
 #include "forth.hpp"
 
-#include <cstdio>
+#include <stdio.h>
 
 namespace Forth {
 
