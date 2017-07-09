@@ -73,6 +73,12 @@ struct VM {
         WORD_ID_OUT_OF_RANGE    = -8,
     };
 
+    enum class Signal {
+        NONE                    = 0,
+        KILL                    = -1,
+        ABORT                   = -2,
+    };
+
     struct Error {
         ErrorCase               errorCase;
         String                  errorString;
@@ -159,6 +165,8 @@ private:
 
     uint32_t                                    wp;             // instruction pointer
 
+    Signal                                      sig;
+
     // debugging facilites
     bool                                        verboseDebugging;
 
@@ -228,6 +236,7 @@ struct Primitives {
     static void     cdsStore        (VM* vm);
     static void     esStore         (VM* vm);
 
+    static void     bye             (VM* vm);
     static void     exit            (VM* vm);
 
     // debug helpers

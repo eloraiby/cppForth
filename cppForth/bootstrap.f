@@ -85,7 +85,7 @@
 
 : -1 1 - ;
 
-: testifelse 0 == if 123 . then 456 . ;
+: testifthen 0 == if 123 . then 456 . ;
 
 : testifthenelse 0 == if 123 . else 456 . then 789 . ;
 

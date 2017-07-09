@@ -472,6 +472,11 @@ Primitives::esStore(VM *vm) {
 }
 
 void
+Primitives::bye(VM *vm) {
+    vm->sig = VM::Signal::ABORT;
+}
+
+void
 Primitives::exit(VM *vm) {
     VM::Value ret    = vm->top();
     vm->pop();
