@@ -24,6 +24,7 @@
 #include "vector.hpp"
 #include "string.hpp"
 #include "hash_map.hpp"
+#include <unordered_map>
 
 #include <memory>
 
@@ -130,7 +131,7 @@ private:
 
     uint32_t        fetch()                     { ++wp; return words[wp]; }
     
-    inline IStream::Ptr     stream() const      { return streams.back(); }
+    inline IStream::Ptr stream() const          { return streams.back(); }
     inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
     inline void     popStream()                 { streams.pop_back(); }
 

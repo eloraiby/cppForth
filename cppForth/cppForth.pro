@@ -3,8 +3,8 @@ CONFIG += console c++11
 CONFIG -= app_bundle
 CONFIG -= qt
 
-QMAKE_CXXFLAGS += -fdata-sections -ffunction-sections -fno-exceptions -std=c++11
-QMAKE_LFLAGS += -static -static-libgcc -static-libstdc++ -Wl,--gc-sections
+QMAKE_CXXFLAGS  += -fno-rtti -fno-exceptions -fno-non-call-exceptions -fno-use-cxa-atexit -ffunction-sections -fdata-sections -fno-common
+QMAKE_LFLAGS += -static-libgcc -static-libstdc++ -Wl,--gc-sections
 
 SOURCES += main.cpp \
     forth.cpp \

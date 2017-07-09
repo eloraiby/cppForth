@@ -131,12 +131,13 @@ main(int argc, char* argv[]) {
     Forth::VM*  vm  = new Forth::VM();
 
     Forth::String core    = readFile("bootstrap.f");
-
     Forth::IStream::Ptr coreStream(new StringStream(core.c_str()));
     vm->loadStream(coreStream);
 
     Forth::IStream::Ptr strm(new StdStream());
     vm->loadStream(strm);
+
+    delete vm;
 
     return 0;
 }
