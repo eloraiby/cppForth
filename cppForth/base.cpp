@@ -1,6 +1,9 @@
 #include "string.hpp"
 
-uint32_t __forth_hash_string__(const char* str)
+#include <stdio.h>
+
+extern "C" {
+FORTH_API uint32_t __forth_hash_string__(const char* str)
 {
 	uint32_t seed = 0;
 
@@ -13,7 +16,7 @@ uint32_t __forth_hash_string__(const char* str)
 	return seed;
 }
 
-uint32_t __forth_reverse_hash_string__(const char* str)
+FORTH_API uint32_t __forth_reverse_hash_string__(const char* str)
 {
 	uint32_t seed = 0;
 
@@ -25,3 +28,6 @@ uint32_t __forth_reverse_hash_string__(const char* str)
 
 	return seed;
 }
+}
+
+

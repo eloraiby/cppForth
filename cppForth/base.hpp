@@ -57,21 +57,6 @@
 #	define NOEXCEPT noexcept
 #endif
 
-#ifdef __GNUC__
-#   define _NEW
-namespace std {
-struct nothrow_t
-{
-  explicit nothrow_t() = default;
-};
-
-extern const nothrow_t nothrow;
-}   // namespace std
-
-//inline void*	operator new(size_t s, const std::nothrow_t&)   NOEXCEPT { return malloc(s);    }
-
-#endif
-
 #include <new>
 
 namespace Forth {
