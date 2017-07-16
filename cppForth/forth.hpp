@@ -176,6 +176,37 @@ private:
     friend struct   Primitives;
 };
 
+struct StdInStream : public IStream {
+    void        testAndFillBuffer();
+    uint32_t    peekChar() override;
+    uint32_t    getChar() override;
+    Mode        getMode() const override;
+    void        setMode(Mode m) override;
+
+    ~StdInStream() override;
+    StdInStream();
+
+    Mode        mode;
+    uint32_t    pos;
+    Forth::String   buff;
+};
+
+struct StringStream : public Forth::IStream {
+    uint32_t        peekChar() override;
+    uint32_t        getChar() override;
+    Mode            getMode() const override;
+    void            setMode(Mode m) override;
+
+    StringStream(const char* str);
+    ~StringStream()    override;
+
+
+    Mode        mode;
+    uint32_t    pos;
+    Forth::String buff;
+};
+
+
 struct Primitives {
     // primitives
     static void     fetchInt32      (VM* vm);
