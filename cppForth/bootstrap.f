@@ -1,13 +1,13 @@
 : _sink_ 0 0 0 0 ;
 
-: i32>w ' lit.i32 >w >w ;
+: i32>w ' lit.i32 w> w> ;
 
 : do immediate
-    w.p 1 + ; 
+    w& 1 + ;
 
 : while immediate
     i32>w
-    ' ?branch >w ;
+    ' ?branch w> ;
 
 : ( immediate
     do
@@ -28,23 +28,23 @@
     while ; 
 
 : if immediate ( cond -- )
-    w.p 7 + i32>w   \ then addr
-    ' ?branch >w
-    w.p 2 +
+    w& 7 + i32>w   \ then addr
+    ' ?branch w>
+    w& 2 +
     0 i32>w         \ else addr
-    ' branch >w ; 
+    ' branch w> ;
 
 : then immediate
-    w.p 1 + swap !w ;
+    w& 1 + swap w! ;
     
 : else immediate
-    w.p 4 + swap !w \ set the else addr in IF after the coming branch
-    w.p 2 +
+    w& 4 + swap w! \ set the else addr in IF after the coming branch
+    w& 2 +
     0 i32>w
-    ' branch >w ;
+    ' branch w> ;
 
 : .readString
-    cd.p 1 + i32>w
+    cd& 1 + i32>w
     do
         stream.getch dup dup dup
         0 =/=
@@ -54,10 +54,10 @@
         dup
         if
             dup 10 .c swap .c 10 .c
-            >cd
+            cd>
         then
     while
-    0 >cd ; \ null terminate
+    0 cd> ; \ null terminate
 
 : " immediate
     .readString ;
@@ -65,7 +65,7 @@
 : .cd
     do
         dup
-        @cd
+        cd@
         dup .c
         swap
         1 +
@@ -74,7 +74,7 @@
 
 : ." immediate
     .readString
-    ' .cd >w ;
+    ' .cd w> ;
 
         
 : *2 2 * ;

@@ -18,3 +18,6 @@ HEADERS += \
     string.hpp \
     vector.hpp \
     intrusive-ptr.hpp
+
+DISTFILES += \
+    bootstrap.f

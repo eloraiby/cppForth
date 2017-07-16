@@ -24,7 +24,6 @@
 #include "vector.hpp"
 #include "string.hpp"
 #include "hash_map.hpp"
-#include <unordered_map>
 
 namespace Forth {
 
@@ -76,7 +75,7 @@ struct VM {
     };
 
     enum class Signal {
-        NONE                    = 0,
+        NONE                    =  0,
         KILL                    = -1,
         ABORT                   = -2,
     };
