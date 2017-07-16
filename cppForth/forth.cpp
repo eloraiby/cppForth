@@ -95,7 +95,7 @@ VM::getToken() {
 
 void
 VM::step() {
-    uint32_t    word    = words[wp];
+    uint32_t    word    = wordSegment[wp];
         
     if( word > functions.size() ) {
         throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
@@ -105,7 +105,7 @@ VM::step() {
     if( verboseDebugging ) {
         fprintf(stdout, "    @%d -- %s", wp, functions[word].name.c_str());
         if( word == 0 ) {
-            fprintf(stdout, " %d", words[wp + 1]);
+            fprintf(stdout, " %d", wordSegment[wp + 1]);
         }
         fprintf(stdout, "\n");
     }

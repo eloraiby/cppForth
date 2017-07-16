@@ -95,7 +95,7 @@ Primitives::defineWord(VM* vm) {
 
         func.name   = name;
 
-        func.start  = vm->words.size();
+        func.start  = vm->wordSegment.size();
         vm->functions.push_back(func);
 
         vm->nameToWord[name]    = wordId;
@@ -201,7 +201,7 @@ Primitives::swap(VM* vm) {
 
 void
 Primitives::codeSize(VM* vm) {
-    VM::Value v(static_cast<int32_t>(vm->words.size()));
+    VM::Value v(static_cast<int32_t>(vm->wordSegment.size()));
     vm->push(v);
 }
 
@@ -231,7 +231,7 @@ Primitives::emitConstData(VM* vm) {
     VM::Value v = vm->top();
     vm->pop();
 
-    vm->constDataStack.push_back(v);
+    vm->constDataSegment.push_back(v);
 }
 
 void
@@ -355,13 +355,13 @@ Primitives::rsPtr(VM *vm) {
 
 void
 Primitives::wsPtr(VM *vm) {
-    VM::Value v(static_cast<int32_t>(vm->words.size()) - 1);
+    VM::Value v(static_cast<int32_t>(vm->wordSegment.size()) - 1);
     vm->push(v);
 }
 
 void
 Primitives::cdsPtr(VM* vm) {
-    VM::Value v(static_cast<int32_t>(vm->constDataStack.size()) - 1);
+    VM::Value v(static_cast<int32_t>(vm->constDataSegment.size()) - 1);
     vm->push(v);
 }
 
@@ -394,7 +394,7 @@ Primitives::wsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
-    VM::Value v(static_cast<int32_t>(vm->words[addr.i32]));
+    VM::Value v(static_cast<int32_t>(vm->wordSegment[addr.i32]));
     vm->push(v);
 }
 
@@ -403,7 +403,7 @@ Primitives::cdsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
-    VM::Value v = vm->constDataStack[addr.i32];
+    VM::Value v = vm->constDataSegment[addr.i32];
     vm->push(v);
 }
 
@@ -446,7 +446,7 @@ Primitives::wsStore(VM *vm) {
     VM::Value v     = vm->top();
     vm->pop();
 
-    vm->words[addr.i32] = v.u32;
+    vm->wordSegment[addr.i32] = v.u32;
 }
 
 void
@@ -457,7 +457,7 @@ Primitives::cdsStore(VM *vm) {
     VM::Value v     = vm->top();
     vm->pop();
 
-    vm->constDataStack[addr.i32] = v;
+    vm->constDataSegment[addr.i32] = v;
 }
 
 void
@@ -498,11 +498,11 @@ Primitives::see(VM *vm) {
          fprintf(stdout, " <native> ");
     } else {
         int32_t     curr    = vm->functions[word].start;
-        while( vm->words[curr] != 1 ) {
-            if( vm->words[curr] == 0 ) {
-                fprintf(stdout, "%d ", vm->words[++curr]);
+        while( vm->wordSegment[curr] != 1 ) {
+            if( vm->wordSegment[curr] == 0 ) {
+                fprintf(stdout, "%d ", vm->wordSegment[++curr]);
             } else {
-                fprintf(stdout, "@%d:%s ", curr, vm->functions[vm->words[curr]].name.c_str());
+                fprintf(stdout, "@%d:%s ", curr, vm->functions[vm->wordSegment[curr]].name.c_str());
             }
 
             ++curr;

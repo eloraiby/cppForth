@@ -126,7 +126,7 @@ struct VM {
     void            runCall(uint32_t word);
 
 
-    inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(words.size()); words.push_back(word); return pos; }
+    inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(wordSegment.size()); wordSegment.push_back(word); return pos; }
 
     uint32_t        addNativeFunction(const String& name, NativeFunction native, bool isImmediate);
 
@@ -139,7 +139,7 @@ private:
     inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); callStack.pop_back(); }
     inline void     setBranch(uint32_t addr)    { wp = addr; }
 
-    uint32_t        fetch()                     { ++wp; return words[wp]; }
+    uint32_t        fetch()                     { ++wp; return wordSegment[wp]; }
     
     inline IStream::Ptr stream() const          { return streams.back(); }
     inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
@@ -153,7 +153,7 @@ private:
     Vector<Function>                            functions;
     HashMap<String, uint32_t>                   nameToWord;
 
-    Vector<uint32_t>                            words;          // the code segment
+    Vector<uint32_t>                            wordSegment;    // the code segment
 
     Vector<Value>                               valueStack;     // contains values on the stack
     Vector<uint32_t>                            returnStack;    // contains calling word pointer
@@ -162,7 +162,7 @@ private:
 
     Vector<IStream::Ptr>                        streams;
 
-    Vector<Value>                               constDataStack; // strings, names, ...
+    Vector<Value>                               constDataSegment;   // strings, names, ...
 
     uint32_t                                    wp;             // instruction pointer
 
@@ -174,6 +174,37 @@ private:
 
     friend struct   Primitives;
 };
+
+struct StdInStream : public IStream {
+    void        testAndFillBuffer();
+    uint32_t    peekChar() override;
+    uint32_t    getChar() override;
+    Mode        getMode() const override;
+    void        setMode(Mode m) override;
+
+    ~StdInStream() override;
+    StdInStream();
+
+    Mode        mode;
+    uint32_t    pos;
+    Forth::String   buff;
+};
+
+struct StringStream : public Forth::IStream {
+    uint32_t        peekChar() override;
+    uint32_t        getChar() override;
+    Mode            getMode() const override;
+    void            setMode(Mode m) override;
+
+    StringStream(const char* str);
+    ~StringStream()    override;
+
+
+    Mode        mode;
+    uint32_t    pos;
+    Forth::String buff;
+};
+
 
 struct Primitives {
     // primitives
