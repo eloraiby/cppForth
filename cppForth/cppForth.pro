@@ -9,7 +9,8 @@ QMAKE_LFLAGS += -static-libgcc -static-libstdc++ -Wl,--gc-sections
 SOURCES += main.cpp \
     forth.cpp \
     primitives.cpp \
-    base.cpp
+    base.cpp \
+    streams.cpp
 
 HEADERS += \
     forth.hpp \
