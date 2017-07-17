@@ -10,7 +10,10 @@ This is <b>NOT</b> an <b>ANS FORTH</b> compliant implementation.
 Simply to learn the language and use it on my RPI Zero W. I like puzzles and using it is like solving a puzzle for each function.
 
 ## Forth in a product ?
-IMHO, I would hardly see Forth (the language) fit for a modern productive environment with multicore, networked machines. I know I don't have that much experience with Forth to be productive with it (information is very scarce to say the least). I have a very hard time promoting functionnal programming languages at work. Stack VM on the other hand are very interresting and it's no secret that the most performing VM platforms are stack based ones (.Net and JVM). Stack machines are here to stay.
+IMHO, I would hardly see Forth (the language) fit for a modern productive environment with multicore, networked machines. I know I don't have that much experience with Forth to be productive with it (information is very scarce to say the least).
+I have a very hard time promoting functionnal programming languages at work, promoting Forth will be an order of magnitude more difficult.
+
+Stack VM on the other hand are another subject and it's no secret that the most performing VM platforms are stack based ones (.Net and JVM): Stack machines are here to stay.
 
 That said, some remarkable projects used and still use Forth or a Forth dialect:
 - Skia (2D compositing/rendering) used to have an embedded forth ([5yrs old code](https://github.com/servo/skia/tree/master/forth)), that code perished long time ago : [up to date code](https://github.com/google/skia/tree/master/src).
