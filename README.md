@@ -1,13 +1,11 @@
 # cppForth
-An embeddable Forth dialect implemented in C++ (without dependencies on the STL). The binary code fits in < 32Kb for ARMv7 and < 64kb for x64 (this requires adding __cxx__ low level ABI functions).
-
-Implementing a barebone forth interpreter is quite straightforward, but implementing a hardened one (with debugging features and proper error handling) is quite a work. This implementation started as an experiment to drive my RPI Zero W and see how hard would it be to implement a full fledged VM. It still has a long way to go before reaching all these goals.
+An embeddable Forth dialect implemented in C++ (without dependencies on the STL). The binary code fits in < 32Kb for ARMv7 and < 64kb for x64 (this requires adding __cxx__ low level ABI functions). Using libstdc++ will bloat it up to 93Kb.
 
 #### Disclaimer
 This is <b>NOT</b> an <b>ANS FORTH</b> compliant implementation.
 
 ## Why a Forth interpreter ?
-Simply to learn the language and use it on my RPI Zero W. I like puzzles and using it is like solving a puzzle for each function.
+Implementing a barebone forth interpreter is quite straightforward, but implementing a hardened one (with debugging features and proper error handling) is quite a work. This implementation started as an experiment to drive my RPI Zero W and see how hard would it be to implement a full fledged VM. It still has a long way to go before reaching all these goals. Otherwise, I like puzzles and making Forth is like solving a puzzle for each function.
 
 ## Forth in a product ?
 IMHO, I would hardly see Forth (the language) fit for a modern productive environment with multicore, networked machines. I know I don't have that much experience with Forth to be productive with it (information is very scarce to say the least).
