@@ -1,7 +1,7 @@
 # cppForth
 An embeddable Forth dialect implemented in C++ (without dependencies on the STL). The binary code fits in < 32Kb for ARMv7 and < 64kb for x64 (this requires adding __cxx__ low level ABI functions).
 
-Implementing a barebone forth interpreter is quite straightforward, but implementing a hardened one (with debugging features and proper error handling) is quite a work. This implementation started as an experiment to see how hard would it be to implement a full fledged VM. It still has a long way to go before reaching all these goals.
+Implementing a barebone forth interpreter is quite straightforward, but implementing a hardened one (with debugging features and proper error handling) is quite a work. This implementation started as an experiment to drive my RPI Zero W and see how hard would it be to implement a full fledged VM. It still has a long way to go before reaching all these goals.
 
 #### Disclaimer
 This is <b>NOT</b> an <b>ANS FORTH</b> compliant implementation.
@@ -16,7 +16,7 @@ I have a very hard time promoting functionnal programming languages at work, pro
 Stack VM on the other hand are another subject and it's no secret that the most performing VM platforms are stack based ones (.Net and JVM): Stack machines are here to stay.
 
 That said, some remarkable projects used and still use Forth or a Forth dialect:
-- Skia (2D compositing/rendering) used to have an embedded forth ([5yrs old code](https://github.com/servo/skia/tree/master/forth)), that code perished long time ago : [up to date code](https://github.com/google/skia/tree/master/src).
+- Skia (2D compositing/rendering) used to have an embedded forth to drive skia in 2009 ([addition commit](https://github.com/google/skia/commit/f56e295e88f4ed42f4c94c54d5fc544ed0f45f18)), that code perished long time ago : [removal commit](https://github.com/google/skia/commit/acc875f9a27d3d0ece0c1b09bbc249ac69e76bac).
 - FreeBSD uses it for the boot loader using FICL ([ref](https://www.freebsd.org/cgi/man.cgi?loader(8))).
 - PumpkinDB uses it as query language ([ref](http://pumpkindb.org/doc/)).
 - PostScript
