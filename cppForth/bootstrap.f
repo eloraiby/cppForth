@@ -44,37 +44,42 @@
     ' branch w> ;
 
 : .readString
-    cd& 1 + i32>w
+    cd& 1 + i32>w                   \ --
     do
-        stream.getch dup dup dup
-        0 =/=
-        swap
-        34 =/=
-        and
-        dup
-        if
-            dup 10 .c swap .c 10 .c
-            cd>
-        then
-    while
-    0 cd> ; \ null terminate
+        stream.getch dup dup        \ -- c c c
+        0 =/=                       \ -- c c b
+        swap                        \ -- c b c
+        34 =/=                      \ -- c b b
+        and                         \ -- c b
+        dup                         \ -- c b b
+        if                          \ -- c b
+            swap                    \ -- b c
+            cd>                     \ -- b
+        then                        \ -- b
+    while                           \ c b -- c
+    drop                            \ c --
+    0 cd> ;                         \ null terminate
+
 
 : " immediate
     .readString ;
 
-: .cd
-    do
-        dup
-        cd@
-        dup .c
-        swap
-        1 +
-        swap
-    while ;
+: .cd                               \ -- c-addr
+    do      
+        dup                         \ -- c-addr c-addr
+        cd@                         \ -- c-addr c
+        dup .c                      \ -- c-addr c
+        swap                        \ -- c c-addr
+        1 +                         \ -- c c-addr
+        swap                        \ -- c-addr c
+    while                           \ -- c-addr
+    drop ;                          \ --
+
 
 : ." immediate
+    cd& 1 +
     .readString
-    ' .cd w> ;
+    .cd ;
 
         
 : *2 2 * ;

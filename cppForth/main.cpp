@@ -15,6 +15,7 @@
 */
 
 #include "forth.hpp"
+#include <stdio.h>
 
 Forth::String
 readFile(const char* filename) {
