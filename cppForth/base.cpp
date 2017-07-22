@@ -28,6 +28,14 @@ FORTH_API uint32_t __forth_reverse_hash_string__(const char* str)
 
 	return seed;
 }
+
 }
+
+void*    operator new(size_t, void* p) NOEXCEPT  { return p; }
+void*    operator new(size_t s) NOEXCEPT     { return malloc(s); }
+void     operator delete(void* p) NOEXCEPT   { free(p);  }
+void*    operator new[](size_t s) NOEXCEPT   { return malloc(s); }
+void     operator delete[](void* p) NOEXCEPT { free(p);  }
+void     __cdecl operator delete[](void* p, size_t) NOEXCEPT { free(p);  }
 
 

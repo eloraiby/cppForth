@@ -57,20 +57,18 @@
 #	define NOEXCEPT noexcept
 #endif
 
-#ifdef __GNUC__
-inline void*    operator new(size_t, void* p) noexcept  { return p; }
-inline void*    operator new(size_t s) noexcept     { return malloc(s); }
-inline void     operator delete(void* p) noexcept   { free(p);  }
-inline void*    operator new[](size_t s) noexcept   { return malloc(s); }
-inline void     operator delete[](void* p) noexcept { free(p);  }
-#else
-#include <new>
-#endif
+void*    operator new(size_t, void* p) NOEXCEPT;
+void*    operator new(size_t s) NOEXCEPT;
+void     operator delete(void* p) NOEXCEPT;
+void*    operator new[](size_t s) NOEXCEPT;
+void     operator delete[](void* p) NOEXCEPT;
+void     __cdecl operator delete[](void* p, size_t) NOEXCEPT;
+
 namespace Forth {
 
 template<typename T>
 struct Hash {
-    static uint32_t    hash(const T& t);
+    static uint32_t    hash(const T& t) { return 0; }
 };
 
 template <>

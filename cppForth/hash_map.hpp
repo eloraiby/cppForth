@@ -62,26 +62,6 @@ struct HashMap : public NonCopyable {
     }
 
 
-	void*
-	operator new(size_t s) {
-		return malloc(s);
-	}
-
-	void
-	operator delete(void* p) {
-		return free(p);
-	}
-
-	void*
-	operator new(size_t /* s */, void* p) {
-		return p;
-	}
-
-	void
-	operator delete(void* /* p */, void*) {
-		return;
-	}
-
 private:
     enum {
         ENDPTR = -1,

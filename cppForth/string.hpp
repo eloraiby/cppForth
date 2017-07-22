@@ -156,26 +156,6 @@ struct String
 	inline const char*	c_str() const			    {	return &(__data[0]);		}
 
 
-	void*
-	operator new(size_t s) {
-		return malloc(s);
-	}
-
-	void
-	operator delete(void* p) {
-		return free(p);
-	}
-
-	void*
-	operator new(size_t /* s */, void* p) {
-		return p;
-	}
-
-	void
-	operator delete(void* /* p */, void*) {
-		return;
-	}
-
 private:
 	Vector<char>		__data;		///< the actual string data
 };	// struct string

@@ -172,26 +172,6 @@ public:
 		}
 	}
 
-	void*
-	operator new(size_t s) {
-		return malloc(s);
-	}
-
-	void
-	operator delete(void* p) {
-		return free(p);
-	}
-
-	void*
-	operator new(size_t /* s */, void* p) {
-		return p;
-	}
-
-	void
-	operator delete(void* /* p */, void*) {
-		return;
-	}
-
 };	// struct vector
 }	// Forth
 #endif // VECTOR_HPP
