@@ -4,7 +4,9 @@ CONFIG -= app_bundle
 CONFIG -= qt
 
 QMAKE_CXXFLAGS  += -fno-rtti -fno-exceptions -fno-non-call-exceptions -fno-use-cxa-atexit -ffunction-sections -fdata-sections -fno-common -DBUILDING_STATIC
-QMAKE_LFLAGS += -static-libgcc -static-libstdc++ -Wl,--gc-sections
+QMAKE_LFLAGS += -static-libgcc -Wl,--gc-sections
+
+QMAKE_LINK  = gcc
 
 SOURCES += main.cpp \
     forth.cpp \
