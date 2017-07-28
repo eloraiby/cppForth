@@ -224,14 +224,6 @@ Primitives::endWord(VM* vm) {
 }
 
 void
-Primitives::emitReturn(VM* vm) {
-    VM::Value v   = vm->top();
-    vm->pop();
-
-    vm->returnStack.push_back(v.u32);
-}
-
-void
 Primitives::emitWord(VM* vm) {
     VM::Value v   = vm->top();
     vm->pop();
@@ -397,7 +389,7 @@ Primitives::rsFetch(VM *vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
-    VM::Value v(static_cast<int32_t>(vm->returnStack[addr.i32]));
+    VM::Value v(static_cast<int32_t>(vm->returnStack[addr.i32].ip));
     vm->push(v);
 }
 
@@ -442,17 +434,6 @@ Primitives::vsStore(VM *vm) {
     vm->pop();
 
     vm->valueStack[addr.i32] = v;
-}
-
-void
-Primitives::rsStore(VM *vm) {
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    VM::Value v     = vm->top();
-    vm->pop();
-
-    vm->returnStack[addr.i32] = v.u32;
 }
 
 void

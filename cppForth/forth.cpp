@@ -132,8 +132,8 @@ VM::throwException(ErrorCase err, const String& str) {
 
     fprintf(stderr, "%s\n", str.c_str());
 
-    for( int i = callStack.size() - 1; i >= 0 ; --i ) {
-        fprintf(stderr, "\t@[%d] - %s\n", callStack[i], functions[callStack[i]].name.c_str());
+    for( int i = returnStack.size() - 1; i >= 0 ; --i ) {
+        fprintf(stderr, "\t@[%d] - %s\n", returnStack[i].word, functions[returnStack[i].word].name.c_str());
     }
 
     // TODO: switch to debug stream (debugging stream)
@@ -253,7 +253,6 @@ VM::initPrimitives() {
         { "swap"        , Primitives::swap          , false },
         { "code.size"   , Primitives::codeSize      , false },
         { ";"           , Primitives::endWord       , true  },
-        { "r>"          , Primitives::emitReturn    , false },
         { "w>"          , Primitives::emitWord      , false },
         { "cd>"         , Primitives::emitConstData , false },
         { "e>"          , Primitives::emitException , false },
@@ -282,7 +281,6 @@ VM::initPrimitives() {
         { "cd@"         , Primitives::cdsFetch      , false },
         { "e@"          , Primitives::esFetch       , false },
         { "!"           , Primitives::vsStore       , false },
-        { "r!"          , Primitives::rsStore       , false },
         { "w!"          , Primitives::wsStore       , false },
         { "cd!"         , Primitives::cdsStore      , false },
         { "e!"          , Primitives::esStore       , false },

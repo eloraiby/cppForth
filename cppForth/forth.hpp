@@ -105,6 +105,7 @@ struct VM {
         float               f32;
         void*               ptr;
         
+        Value()                     : u32(0) {}
         explicit Value(uint32_t v)  : u32(v) {}
         explicit Value(int32_t v)   : i32(v) {}
         explicit Value(float v)     : f32(v) {}
@@ -148,8 +149,8 @@ struct VM {
     VM();
 
 private:
-    inline void     setCall(uint32_t word)      { callStack.push_back(word); returnStack.push_back(wp); wp = functions[word].start; }
-    inline void     setRet()                    { wp = returnStack.back(); returnStack.pop_back(); callStack.pop_back(); }
+    inline void     setCall(uint32_t word)      { RetEntry re; re.word = word; re.ip = wp; re.ls = localStack.size(); returnStack.push_back(re); wp = functions[word].start; localStack.resize(localStack.size() + functions[word].localCount); }
+    inline void     setRet()                    { uint32_t word = returnStack.back().word; wp = returnStack.back().ip; localStack.resize(localStack.size() - functions[word].localCount); returnStack.pop_back(); }
     inline void     setBranch(uint32_t addr)    { wp = addr; }
 
     uint32_t        fetch()                     { ++wp; return wordSegment[wp]; }
@@ -169,11 +170,9 @@ private:
     Vector<uint32_t>                            wordSegment;    // the code segment
 
     Vector<Value>                               valueStack;     // contains values on the stack
-    Vector<uint32_t>                            returnStack;    // contains calling word pointer
+    Vector<RetEntry>                            returnStack;    // contains calling word pointer
     Vector<Error>                               exceptionStack; // exception stack
     Vector<Value>                               localStack;     // local block stack
-
-    Vector<uint32_t>                            callStack;      // contains current executing words
 
     Vector<IStream::Ptr>                        streams;
 
@@ -246,7 +245,6 @@ struct Primitives {
     static void     codeSize        (VM* vm);
     static void     endWord         (VM* vm);
 
-    static void     emitReturn      (VM* vm);
     static void     emitWord        (VM* vm);
     static void     emitConstData   (VM* vm);
     static void     emitException   (VM* vm);
@@ -280,7 +278,6 @@ struct Primitives {
     static void     esFetch         (VM* vm);
 
     static void     vsStore         (VM* vm);
-    static void     rsStore         (VM* vm);
     static void     lsStore         (VM* vm);
     static void     wsStore         (VM* vm);
     static void     cdsStore        (VM* vm);

@@ -104,3 +104,15 @@
         0 =/=
     while
     drop ;
+
+(
+: dec100.locals
+    locals 3
+    0 0 !l
+    1 1 !l
+    2 2 !l
+    0 .l 
+    1 .l
+    2 .l
+    ;
+)
