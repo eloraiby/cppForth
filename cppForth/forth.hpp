@@ -72,6 +72,8 @@ struct VM {
         WORD_NOT_DEFINED        = -6,
         INT_IS_NO_WORD          = -7,
         WORD_ID_OUT_OF_RANGE    = -8,
+        LOCAL_IS_NOT_INT        = -9,
+        LOCAL_OVERFLOW          = -10,
     };
 
     enum class Signal {
@@ -85,6 +87,16 @@ struct VM {
         String                  errorString;
 
         Error(ErrorCase ec, const String& str) : errorCase(ec), errorString(str) {}
+    };
+
+    ///
+    /// return stack entry
+    ///
+    struct RetEntry {
+        uint32_t            word;
+        uint32_t            ip;
+        uint32_t            ls;
+        uint32_t            as;
     };
 
     union Value {
@@ -107,8 +119,9 @@ struct VM {
         bool                isImmediate;
         NativeFunction      native;
         int32_t             start;
+        uint32_t            localCount;
 
-        Function() : isImmediate(false), native(nullptr), start(-1) {}
+        Function() : isImmediate(false), native(nullptr), start(-1), localCount(0) {}
     };
 
     int32_t         findWord(const String& name);
@@ -157,8 +170,10 @@ private:
 
     Vector<Value>                               valueStack;     // contains values on the stack
     Vector<uint32_t>                            returnStack;    // contains calling word pointer
-    Vector<uint32_t>                            callStack;      // contains current executing words
     Vector<Error>                               exceptionStack; // exception stack
+    Vector<Value>                               localStack;     // local block stack
+
+    Vector<uint32_t>                            callStack;      // contains current executing words
 
     Vector<IStream::Ptr>                        streams;
 
@@ -217,6 +232,7 @@ struct Primitives {
     static void     printChar       (VM* vm);
     static void     defineWord      (VM* vm);
     static void     immediate       (VM* vm);
+    static void     setLocalCount   (VM* vm);
     static void     addInt32        (VM* vm);
     static void     subInt32        (VM* vm);
     static void     mulInt32        (VM* vm);
@@ -258,15 +274,19 @@ struct Primitives {
 
     static void     vsFetch         (VM* vm);
     static void     rsFetch         (VM* vm);
+    static void     lsFetch         (VM* vm);
     static void     wsFetch         (VM* vm);
     static void     cdsFetch        (VM* vm);
     static void     esFetch         (VM* vm);
 
     static void     vsStore         (VM* vm);
     static void     rsStore         (VM* vm);
+    static void     lsStore         (VM* vm);
     static void     wsStore         (VM* vm);
     static void     cdsStore        (VM* vm);
     static void     esStore         (VM* vm);
+
+
 
     static void     bye             (VM* vm);
     static void     exit            (VM* vm);
