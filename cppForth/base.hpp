@@ -62,8 +62,11 @@ void*    operator new(size_t s) NOEXCEPT;
 void     operator delete(void* p) NOEXCEPT;
 void*    operator new[](size_t s) NOEXCEPT;
 void     operator delete[](void* p) NOEXCEPT;
+#ifdef _MSVC_VER
 void     __cdecl operator delete[](void* p, size_t) NOEXCEPT;
-
+#else
+void     operator delete[](void* p, size_t) NOEXCEPT;
+#endif
 namespace Forth {
 
 template<typename T>
