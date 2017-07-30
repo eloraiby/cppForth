@@ -149,9 +149,28 @@ struct VM {
     VM();
 
 private:
-    inline void     setCall(uint32_t word)      { RetEntry re; re.word = word; re.ip = wp; re.ls = localStack.size(); returnStack.push_back(re); wp = functions[word].start; localStack.resize(localStack.size() + functions[word].localCount); }
-    inline void     setRet()                    { uint32_t word = returnStack.back().word; wp = returnStack.back().ip; localStack.resize(localStack.size() - functions[word].localCount); returnStack.pop_back(); }
+    inline void
+    setCall(uint32_t word) {
+        RetEntry re;
+        re.word = word;
+        re.ip = wp;
+        re.ls = localStack.size();
+        returnStack.push_back(re);
+        wp = functions[word].start;
+        localStack.resize(localStack.size() + functions[word].localCount);
+    }
+
+    inline void
+    setRet() {
+        uint32_t word = returnStack.back().word;
+        wp = returnStack.back().ip;
+        localStack.resize(localStack.size() - functions[word].localCount);
+        returnStack.pop_back();
+    }
+
     inline void     setBranch(uint32_t addr)    { wp = addr; }
+
+    inline uint32_t localTop() const            { return returnStack[returnStack.size() - 1].ls; }
 
     uint32_t        fetch()                     { ++wp; return wordSegment[wp]; }
     

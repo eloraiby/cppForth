@@ -111,14 +111,14 @@ Primitives::immediate(VM* vm) {
 
 void
 Primitives::setLocalCount(VM* vm) {
-    String name    = vm->getToken();
+    String tok  = vm->getToken();
 
-    if( !VM::isInt(name) ) {
+    if( !VM::isInt(tok) ) {
         vm->throwException(VM::ErrorCase::LOCAL_IS_NOT_INT, "a local should be an integer");
         return;
     }
 
-    vm->functions[vm->functions.size() - 1].localCount = true;
+    vm->functions[vm->functions.size() - 1].localCount = VM::toInt32(tok);
 }
 
 void
@@ -395,7 +395,13 @@ Primitives::rsFetch(VM *vm) {
 
 void
 Primitives::lsFetch(VM* vm) {
-    // TODO
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    uint32_t lp     = vm->localTop() + addr.u32;
+
+    VM::Value v = vm->localStack[lp];
+    vm->push(v);
 }
 
 void
@@ -438,7 +444,15 @@ Primitives::vsStore(VM *vm) {
 
 void
 Primitives::lsStore(VM* vm) {
-    // TODO
+    VM::Value addr   = vm->top();
+    vm->pop();
+
+    VM::Value v     = vm->top();
+    vm->pop();
+
+    uint32_t lp     = vm->localTop() + addr.u32;
+
+    vm->localStack[lp] = v;
 }
 
 void
