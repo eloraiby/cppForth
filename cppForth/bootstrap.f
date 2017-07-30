@@ -109,8 +109,6 @@
     while
     drop ;
 
-
-
 : test.locals
     locals 3
     10 0 l!
@@ -120,3 +118,22 @@
     1 .l
     2 .l
     ;
+
+: dec100.locals
+    locals 1
+    
+    100
+    0 l!
+    do
+        0 l@
+        dup .
+        1 -
+        0 l!
+        0 l@
+        0 =/=
+    while
+    drop ;
+
+
+    
+
