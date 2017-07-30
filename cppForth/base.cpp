@@ -36,6 +36,6 @@ void*    operator new(size_t s) NOEXCEPT     { return malloc(s); }
 void     operator delete(void* p) NOEXCEPT   { free(p);  }
 void*    operator new[](size_t s) NOEXCEPT   { return malloc(s); }
 void     operator delete[](void* p) NOEXCEPT { free(p);  }
-void     __cdecl operator delete[](void* p, size_t) NOEXCEPT { free(p);  }
+void     operator delete[](void* p, size_t) NOEXCEPT { free(p);  }
 
 

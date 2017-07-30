@@ -24,8 +24,8 @@ void
 StdInStream::testAndFillBuffer() {
     if(pos >= buff.size()) {
         char tmp[8192] = {0};
-        scanf("%s", tmp);
-        buff += tmp;
+        char* res = fgets(tmp, 8192, stdin);
+        buff += res;
         buff += '\n';
     }
 }
