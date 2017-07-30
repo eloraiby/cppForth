@@ -217,7 +217,7 @@ VM::loadStream(IStream::Ptr strm) {
     streams.pop_back();
 }
 
-VM::VM() : wp(0), sig(Signal::NONE), verboseDebugging(false) {
+VM::VM() : wp(0), lp(0), sig(Signal::NONE), verboseDebugging(false) {
     initPrimitives();
 }
 

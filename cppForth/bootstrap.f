@@ -90,6 +90,10 @@
 
 : -1 1 - ;
 
+: .l immediate
+    ' l@ w>
+    ' . w> ;
+
 : testifthen 0 == if 123 . then 456 . ;
 
 : testifthenelse 0 == if 123 . else 456 . then 789 . ;
@@ -105,13 +109,13 @@
     while
     drop ;
 
-: .l l@ . ;
 
-: dec100.locals
+
+: test.locals
     locals 3
-    0 0 l!
-    1 1 l!
-    2 2 l!
+    10 0 l!
+    11 1 l!
+    12 2 l!
     0 .l 
     1 .l
     2 .l

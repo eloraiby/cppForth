@@ -398,7 +398,7 @@ Primitives::lsFetch(VM* vm) {
     VM::Value addr   = vm->top();
     vm->pop();
 
-    uint32_t lp     = vm->localTop() + addr.u32;
+    uint32_t lp     = vm->lp + addr.u32;
 
     VM::Value v = vm->localStack[lp];
     vm->push(v);
@@ -450,7 +450,7 @@ Primitives::lsStore(VM* vm) {
     VM::Value v     = vm->top();
     vm->pop();
 
-    uint32_t lp     = vm->localTop() + addr.u32;
+    uint32_t lp     = vm->lp + addr.u32;
 
     vm->localStack[lp] = v;
 }

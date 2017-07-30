@@ -95,7 +95,7 @@ struct VM {
     struct RetEntry {
         uint32_t            word;
         uint32_t            ip;
-        uint32_t            ls;
+        uint32_t            lp;
         uint32_t            as;
     };
 
@@ -154,23 +154,23 @@ private:
         RetEntry re;
         re.word = word;
         re.ip = wp;
-        re.ls = localStack.size();
+        re.lp = lp;
         returnStack.push_back(re);
-        wp = functions[word].start;
-        localStack.resize(localStack.size() + functions[word].localCount);
+        wp  = functions[word].start;
+        lp  = localStack.size();
+        localStack.resize(lp + functions[word].localCount);
     }
 
     inline void
     setRet() {
         uint32_t word = returnStack.back().word;
         wp = returnStack.back().ip;
+        lp  = returnStack.back().lp;
         localStack.resize(localStack.size() - functions[word].localCount);
         returnStack.pop_back();
     }
 
     inline void     setBranch(uint32_t addr)    { wp = addr; }
-
-    inline uint32_t localTop() const            { return returnStack[returnStack.size() - 1].ls; }
 
     uint32_t        fetch()                     { ++wp; return wordSegment[wp]; }
     
@@ -198,6 +198,7 @@ private:
     Vector<Value>                               constDataSegment;   // strings, names, ...
 
     uint32_t                                    wp;             // instruction pointer
+    uint32_t                                    lp;             // local pointer
 
     Signal                                      sig;
 
