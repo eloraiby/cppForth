@@ -60,7 +60,6 @@
     drop                            \ c --
     0 cd> ;                         \ null terminate
 
-
 : " immediate
     .readString ;
 
@@ -133,7 +132,5 @@
         0 =/=
     while
     drop ;
-
-
     
 

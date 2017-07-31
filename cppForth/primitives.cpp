@@ -20,6 +20,11 @@
 
 namespace Forth {
 
+#define VS_POP(V)   \
+    if( vm->valueStack.size() == 0 ) { vm->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow"); return; } \
+    VM::Value   V = vm->top(); \
+    vm->pop()
+
 void
 Primitives::fetchInt32(VM* vm) {
     int32_t    u   = vm->fetch();
@@ -55,24 +60,20 @@ Primitives::wordId(VM* vm) {
 
 void
 Primitives::callIndirect(VM* vm) {
-    VM::Value   u   = vm->top();
-    vm->pop();
-
+    VS_POP(u);
     vm->setCall(u.u32);
     --vm->wp;   // once outside the native, wp will get incremented, so decrement to stay at the start of the word
 }
 
 void
 Primitives::printInt32(VM* vm) {
-    VM::Value   v   = vm->top();
-    vm->pop();
+    VS_POP(v);
     fprintf(stdout, "%d\n", v.i32);
 }
 
 void
 Primitives::printChar(VM* vm) {
-    VM::Value   v   = vm->top();
-    vm->pop();
+    VS_POP(v);
     fprintf(stdout, "%c", static_cast<char>(v.i32));
 }
 
@@ -123,46 +124,36 @@ Primitives::setLocalCount(VM* vm) {
 
 void
 Primitives::addInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 + b.i32));
 }
 
 void
 Primitives::subInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 - b.i32));
 }
 
 void
 Primitives::mulInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 * b.i32));
 }
 
 void
 Primitives::divInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 / b.i32));
 }
 
 void
 Primitives::modInt32(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 % b.i32));
 }
 
