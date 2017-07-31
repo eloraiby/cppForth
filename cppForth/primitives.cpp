@@ -211,24 +211,19 @@ Primitives::endWord(VM* vm) {
 
 void
 Primitives::emitWord(VM* vm) {
-    VM::Value v   = vm->top();
-    vm->pop();
+    VS_POP(v);
     vm->emit(v.u32);
 }
 
 void
 Primitives::emitConstData(VM* vm) {
-    VM::Value v = vm->top();
-    vm->pop();
-
+    VS_POP(v);
     vm->constDataSegment.push_back(v);
 }
 
 void
 Primitives::emitException(VM* vm) {
-    VM::Value v = vm->top();
-    vm->pop();
-
+    VS_POP(v);
     vm->exceptionStack.push_back(VM::Error(static_cast<VM::ErrorCase>(v.i32), ""));
 }
 
@@ -253,81 +248,63 @@ Primitives::streamToken(VM* vm) {
 
 void
 Primitives::ieq(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value((a.i32 == b.i32) ? -1 : 0));
 }
 
 void
 Primitives::ineq(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value((a.i32 != b.i32) ? -1 : 0));
 }
 
 void
 Primitives::igt(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 > b.i32));
 }
 
 void
 Primitives::ilt(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 < b.i32));
 }
 
 void
 Primitives::igeq(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 >= b.i32));
 }
 
 void
 Primitives::ileq(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.i32 <= b.i32));
 }
 
 void
 Primitives::notBW(VM* vm) {
-    VM::Value v   = vm->top();
-    vm->pop();
-
+    VS_POP(v);
     vm->push(VM::Value(!v.u32));
 }
 
 void
 Primitives::andBW(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.u32 & b.u32));
 }
 
 void
 Primitives::orBW(VM* vm) {
-    VM::Value b   = vm->top();
-    vm->pop();
-    VM::Value a   = vm->top();
-    vm->pop();
+    VS_POP(b);
+    VS_POP(a);
     vm->push(VM::Value(a.u32 | b.u32));
 }
 
@@ -363,26 +340,21 @@ Primitives::esPtr(VM* vm) {
 
 void
 Primitives::vsFetch(VM *vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
-
+    VS_POP(addr);
     VM::Value v = vm->valueStack[addr.i32];
     vm->push(v);
 }
 
 void
 Primitives::rsFetch(VM *vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
-
+    VS_POP(addr);
     VM::Value v(static_cast<int32_t>(vm->returnStack[addr.i32].ip));
     vm->push(v);
 }
 
 void
 Primitives::lsFetch(VM* vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
+    VS_POP(addr);
 
     uint32_t lp     = vm->lp + addr.u32;
 
@@ -392,8 +364,7 @@ Primitives::lsFetch(VM* vm) {
 
 void
 Primitives::wsFetch(VM *vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
+    VS_POP(addr);
 
     VM::Value v(static_cast<int32_t>(vm->wordSegment[addr.i32]));
     vm->push(v);
@@ -401,40 +372,30 @@ Primitives::wsFetch(VM *vm) {
 
 void
 Primitives::cdsFetch(VM *vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
-
+    VS_POP(addr);
     VM::Value v = vm->constDataSegment[addr.i32];
     vm->push(v);
 }
 
 void
 Primitives::esFetch(VM *vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
-
+    VS_POP(addr);
     VM::ErrorCase v = vm->exceptionStack[addr.i32].errorCase;
     vm->push(VM::Value(static_cast<int32_t>(v)));
 }
 
 void
 Primitives::vsStore(VM *vm) {
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    VM::Value v     = vm->top();
-    vm->pop();
+    VS_POP(addr);
+    VS_POP(v);
 
     vm->valueStack[addr.i32] = v;
 }
 
 void
 Primitives::lsStore(VM* vm) {
-    VM::Value addr   = vm->top();
-    vm->pop();
-
-    VM::Value v     = vm->top();
-    vm->pop();
+    VS_POP(addr);
+    VS_POP(v);
 
     uint32_t lp     = vm->lp + addr.u32;
 
@@ -443,33 +404,24 @@ Primitives::lsStore(VM* vm) {
 
 void
 Primitives::wsStore(VM *vm) {
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    VM::Value v     = vm->top();
-    vm->pop();
+    VS_POP(addr);
+    VS_POP(v);
 
     vm->wordSegment[addr.i32] = v.u32;
 }
 
 void
 Primitives::cdsStore(VM *vm) {
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    VM::Value v     = vm->top();
-    vm->pop();
+    VS_POP(addr);
+    VS_POP(v);
 
     vm->constDataSegment[addr.i32] = v;
 }
 
 void
 Primitives::esStore(VM *vm) {
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    VM::Value v     = vm->top();
-    vm->pop();
+    VS_POP(addr);
+    VS_POP(v);
 
     vm->exceptionStack[addr.i32] = VM::Error(static_cast<VM::ErrorCase>(v.i32), "");
 }
@@ -481,8 +433,7 @@ Primitives::bye(VM *vm) {
 
 void
 Primitives::exit(VM *vm) {
-    VM::Value ret    = vm->top();
-    vm->pop();
+    VS_POP(ret);
     ::exit(ret.i32);
 }
 
@@ -521,8 +472,7 @@ Primitives::see(VM *vm) {
 
 void
 Primitives::setDebugMode(VM* vm) {
-    VM::Value v    = vm->top();
-    vm->pop();
+    VS_POP(v);
     vm->verboseDebugging    = v.u32 ? true : false;
 }
 
