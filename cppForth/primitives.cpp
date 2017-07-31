@@ -19,6 +19,8 @@
 #include <cstdlib>
 
 namespace Forth {
+#define VS_CHECK() \
+    if( vm->valueStack.size() == 0 ) { vm->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow"); return; } \
 
 #define VS_POP(V)   \
     if( vm->valueStack.size() == 0 ) { vm->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow"); return; } \
@@ -159,20 +161,14 @@ Primitives::modInt32(VM* vm) {
 
 void
 Primitives::branch(VM* vm) {
-
-    VM::Value addr  = vm->top();
-    vm->pop();
-
+    VS_POP(addr);
     vm->setBranch(addr.i32 - 1);
 }
 
 void
 Primitives::branchIf(VM* vm) {
-    VM::Value addr  = vm->top();
-    vm->pop();
-
-    VM::Value cond  = vm->top();
-    vm->pop();
+    VS_POP(addr);
+    VS_POP(cond);
 
     if( cond.i32 != 0 ) {
         vm->setBranch(addr.i32 - 1);
@@ -181,22 +177,21 @@ Primitives::branchIf(VM* vm) {
 
 void
 Primitives::dup(VM* vm) {
-    VM::Value val  = vm->top();
+    VS_CHECK()
+    VM::Value val   = vm->top();
     vm->push(val);
 }
 
 void
 Primitives::drop(VM* vm) {
+    VS_CHECK()
     vm->pop();
 }
 
 void
 Primitives::swap(VM* vm) {
-    VM::Value v0  = vm->top();
-    vm->pop();
-
-    VM::Value v1  = vm->top();
-    vm->pop();
+    VS_POP(v0);
+    VS_POP(v1);
 
     vm->push(v0);
     vm->push(v1);
