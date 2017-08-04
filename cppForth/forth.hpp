@@ -54,9 +54,9 @@ struct IStream {
             || ch == static_cast<uint32_t>('\a'));
     }
 
-	inline void		grab() const			{ ++count_;		}
-	inline void		release() const			{ --count_; if( count_ == 0 ) { delete this; } }
-	inline size_t		getRefCount() const		{ return count_;	}
+	inline void		        grab() const			{ ++count_;		}
+	inline void		        release() const			{ --count_; if( count_ == 0 ) { delete this; } }
+	inline size_t		    getRefCount() const		{ return count_;	}
 
 private:
     mutable uint32_t        count_;
@@ -83,8 +83,8 @@ struct VM {
     };
 
     struct Error {
-        ErrorCase               errorCase;
-        String                  errorString;
+        ErrorCase           errorCase;
+        String              errorString;
 
         Error(ErrorCase ec, const String& str) : errorCase(ec), errorString(str) {}
     };
@@ -210,17 +210,17 @@ private:
 };
 
 struct StdInStream : public IStream {
-    void        testAndFillBuffer();
-    uint32_t    peekChar() override;
-    uint32_t    getChar() override;
-    Mode        getMode() const override;
-    void        setMode(Mode m) override;
+    void            testAndFillBuffer();
+    uint32_t        peekChar() override;
+    uint32_t        getChar() override;
+    Mode            getMode() const override;
+    void            setMode(Mode m) override;
 
     ~StdInStream() override;
     StdInStream();
 
-    Mode        mode;
-    uint32_t    pos;
+    Mode            mode;
+    uint32_t        pos;
     Forth::String   buff;
 };
 
@@ -234,9 +234,9 @@ struct StringStream : public Forth::IStream {
     ~StringStream()    override;
 
 
-    Mode        mode;
-    uint32_t    pos;
-    Forth::String buff;
+    Mode            mode;
+    uint32_t        pos;
+    Forth::String   buff;
 };
 
 
