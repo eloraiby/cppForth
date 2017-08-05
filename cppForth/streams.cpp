@@ -42,13 +42,13 @@ StdInStream::getChar() {
     return buff[pos++];
 }
     
-IStream::Mode
+IInputStream::Mode
 StdInStream::getMode() const {
     return mode;
 }
     
 void
-StdInStream::setMode(IStream::Mode m) {
+StdInStream::setMode(IInputStream::Mode m) {
     mode = m;
 }
 
@@ -80,7 +80,7 @@ StringStream::getChar() {
     }
 }
     
-IStream::Mode
+IInputStream::Mode
 StringStream::getMode() const {
     return mode;
 }

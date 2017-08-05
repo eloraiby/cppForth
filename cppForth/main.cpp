@@ -45,10 +45,10 @@ main(int argc, char* argv[]) {
     Forth::VM*  vm  = new Forth::VM();
 
     Forth::String core    = readFile("bootstrap.f");
-    Forth::IStream::Ptr coreStream(new Forth::StringStream(core.c_str()));
+    Forth::IInputStream::Ptr coreStream(new Forth::StringStream(core.c_str()));
     vm->loadStream(coreStream);
 
-    Forth::IStream::Ptr strm(new Forth::StdInStream());
+    Forth::IInputStream::Ptr strm(new Forth::StdInStream());
     vm->loadStream(strm);
 
     delete vm;

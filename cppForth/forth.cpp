@@ -19,7 +19,7 @@
 
 namespace Forth {
 
-IStream::~IStream() {}
+IInputStream::~IInputStream() {}
 
 int32_t
 VM::findWord(const String& name) {
@@ -83,10 +83,10 @@ VM::getToken() {
     String ret;
     
     // remove white space
-    while( stream()->peekChar() && IStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
+    while( stream()->peekChar() && IInputStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
     
     // get token
-    while( stream()->peekChar() && !IStream::isSpace(stream()->peekChar()) ) {
+    while( stream()->peekChar() && !IInputStream::isSpace(stream()->peekChar()) ) {
         ret += stream()->getChar();
     }
 
@@ -138,7 +138,7 @@ VM::throwException(ErrorCase err, const String& str) {
 
     // TODO: switch to debug stream (debugging stream)
     // popStream();
-    stream()->setMode(IStream::Mode::EVAL);
+    stream()->setMode(IInputStream::Mode::EVAL);
 }
 
 void
@@ -169,7 +169,7 @@ VM::runCall(uint32_t word) {
 }
 
 void
-VM::loadStream(IStream::Ptr strm) {
+VM::loadStream(IInputStream::Ptr strm) {
     streams.push_back(strm);
     size_t    startExceptionSize = exceptionStack.size();
 
@@ -177,7 +177,7 @@ VM::loadStream(IStream::Ptr strm) {
         String tok = getToken();
 
         switch( stream()->getMode() ) {
-        case IStream::Mode::EVAL:
+        case IInputStream::Mode::EVAL:
             if( isInt(tok) ) {
                 Value v(toInt32(tok));
                 valueStack.push_back(v);
@@ -192,7 +192,7 @@ VM::loadStream(IStream::Ptr strm) {
             }
             break;
 
-        case IStream::Mode::COMPILE:
+        case IInputStream::Mode::COMPILE:
             if( isInt(tok) ) {
                 emit(0);
                 emit(Value(toInt32(tok)).u32);

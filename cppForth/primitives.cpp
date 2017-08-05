@@ -103,7 +103,7 @@ Primitives::defineWord(VM* vm) {
 
         vm->nameToWord[name]    = wordId;
         
-        vm->stream()->setMode(IStream::Mode::COMPILE);
+        vm->stream()->setMode(IInputStream::Mode::COMPILE);
     }
 }
 
@@ -205,7 +205,7 @@ Primitives::codeSize(VM* vm) {
 
 void
 Primitives::endWord(VM* vm) {
-    vm->stream()->setMode(IStream::Mode::EVAL);
+    vm->stream()->setMode(IInputStream::Mode::EVAL);
     vm->emit(1);
 }
 

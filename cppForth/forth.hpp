@@ -29,9 +29,9 @@ namespace Forth {
 
 enum { MAX_BUFF = 1024 };
 
-struct IStream {
-    typedef IntrusivePtr<IStream>    Ptr;
-    IStream() : count_(0) {}
+struct IInputStream {
+    typedef IntrusivePtr<IInputStream>  Ptr;
+    IInputStream() : count_(0) {}
 
     enum class Mode {
         COMPILE,
@@ -42,7 +42,7 @@ struct IStream {
     virtual uint32_t        getChar()       = 0;
     virtual Mode            getMode() const = 0;
     virtual void            setMode(Mode m) = 0;
-    virtual                 ~IStream()      = 0;
+    virtual                 ~IInputStream() = 0;
     
     static inline
     bool
@@ -77,9 +77,10 @@ struct VM {
     };
 
     enum class Signal {
-        NONE                    =  0,
-        KILL                    = -1,
-        ABORT                   = -2,
+        NONE                    =  0,   // continue execution
+        KILL                    = -1,   // killed
+        ABORT                   = -2,   // abort execution
+        BREAK                   = -3,   // breakpoint
     };
 
     struct Error {
@@ -126,7 +127,7 @@ struct VM {
     };
 
     int32_t         findWord(const String& name);
-    void            loadStream(IStream::Ptr stream);
+    void            loadStream(IInputStream::Ptr stream);
 
 
     inline uint32_t wordAddr(uint32_t word)     { return functions[word].start; }
@@ -174,8 +175,8 @@ private:
 
     uint32_t        fetch()                     { ++wp; return wordSegment[wp]; }
     
-    inline IStream::Ptr stream() const          { return streams.back(); }
-    inline void     pushStream(IStream::Ptr strm)   { streams.push_back(strm); }
+    inline IInputStream::Ptr    stream() const  { return streams.back(); }
+    inline void     pushStream(IInputStream::Ptr strm)  { streams.push_back(strm); }
     inline void     popStream()                 { streams.pop_back(); }
 
     void            initPrimitives();
@@ -193,7 +194,7 @@ private:
     Vector<Error>                               exceptionStack; // exception stack
     Vector<Value>                               localStack;     // local block stack
 
-    Vector<IStream::Ptr>                        streams;
+    Vector<IInputStream::Ptr>                   streams;
 
     Vector<Value>                               constDataSegment;   // strings, names, ...
 
@@ -209,7 +210,7 @@ private:
     friend struct   Primitives;
 };
 
-struct StdInStream : public IStream {
+struct StdInStream : public IInputStream {
     void            testAndFillBuffer();
     uint32_t        peekChar() override;
     uint32_t        getChar() override;
@@ -224,7 +225,7 @@ struct StdInStream : public IStream {
     Forth::String   buff;
 };
 
-struct StringStream : public Forth::IStream {
+struct StringStream : public IInputStream {
     uint32_t        peekChar() override;
     uint32_t        getChar() override;
     Mode            getMode() const override;
