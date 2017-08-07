@@ -98,6 +98,7 @@ struct VM {
         uint32_t            ip;
         uint32_t            lp;
         uint32_t            as;
+        uint32_t            cp; // exception catcher (catch pointer)
     };
 
     union Value {
@@ -239,7 +240,6 @@ struct StringStream : public IInputStream {
     uint32_t        pos;
     Forth::String   buff;
 };
-
 
 struct Primitives {
     // primitives
