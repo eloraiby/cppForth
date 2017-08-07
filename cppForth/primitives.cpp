@@ -24,11 +24,11 @@ namespace Forth {
 
 #define VS_POP(V)   \
     if( vm->valueStack.size() == 0 ) { vm->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow"); return; } \
-    VM::Value   V = vm->top(); \
-    vm->pop()
+    VM::Value   V = vm->topValue(); \
+    vm->popValue()
 
 void
-Primitives::fetchInt32(VM* vm) {
+Primitives::fetchInt32(VM::Process* vm) {
     int32_t    u   = vm->fetch();
     VM::Value   v(u);
     vm->push(v);
