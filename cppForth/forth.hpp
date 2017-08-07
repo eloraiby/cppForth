@@ -29,9 +29,9 @@ namespace Forth {
 
 enum { MAX_BUFF = 1024 };
 
-struct IInputStream {
+struct IInputStream : public RCObject {
     typedef IntrusivePtr<IInputStream>  Ptr;
-    IInputStream() : count_(0) {}
+    IInputStream() {}
 
     enum class Mode {
         COMPILE,
@@ -53,13 +53,6 @@ struct IInputStream {
             || ch == static_cast<uint32_t>(' ')
             || ch == static_cast<uint32_t>('\a'));
     }
-
-	inline void		        grab() const			{ ++count_;		}
-	inline void		        release() const			{ --count_; if( count_ == 0 ) { delete this; } }
-	inline size_t		    getRefCount() const		{ return count_;	}
-
-private:
-    mutable uint32_t        count_;
 };
 
 struct VM {

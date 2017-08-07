@@ -208,5 +208,21 @@ IntrusivePtr<T> dynamic_pointer_cast(IntrusivePtr<U> const & p) {
 	return dynamic_cast<T *>(p.get());
 }
 
+struct RCObject;
+
+struct RCObject {
+    typedef IntrusivePtr<RCObject> Ptr;
+
+    RCObject() : count_(0) {}
+    virtual                 ~RCObject()   = 0;
+
+	inline void		        grab() const			{ ++count_;		}
+	inline void		        release() const			{ --count_; if( count_ == 0 ) { delete this; } }
+	inline size_t		    getRefCount() const		{ return count_;	}
+
+private:
+    mutable uint32_t        count_;
+};
+
 } // namespace Forth
 #endif  // INTRUSIVE_PTR__HPP
