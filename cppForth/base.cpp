@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "forth.hpp"
+
 extern "C" {
 FORTH_API uint32_t __forth_hash_string__(const char* str)
 {
@@ -37,5 +39,10 @@ void     operator delete(void* p) NOEXCEPT   { free(p);  }
 void*    operator new[](size_t s) NOEXCEPT   { return malloc(s); }
 void     operator delete[](void* p) NOEXCEPT { free(p);  }
 void     operator delete[](void* p, size_t) NOEXCEPT { free(p);  }
+
+namespace Forth {
+RCObject::~RCObject() {}
+
+}
 
 
