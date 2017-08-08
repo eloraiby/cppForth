@@ -94,32 +94,32 @@ VM::getToken() {
 }
 
 void
-VM::step() {
-    uint32_t    word    = wordSegment[wp];
+VM::Process::step() {
+    uint32_t    word    = vm_->wordSegment[wp_];
         
-    if( word > functions.size() ) {
+    if( word > vm_->functions.size() ) {
         throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
         return;
     }
 
-    if( verboseDebugging ) {
-        fprintf(stdout, "    @%d -- %s", wp, functions[word].name.c_str());
+    if( vm_->verboseDebugging ) {
+        fprintf(stdout, "    @%d -- %s", wp_, vm_->functions[word].name.c_str());
         if( word == 0 ) {
-            fprintf(stdout, " %d", wordSegment[wp + 1]);
+            fprintf(stdout, " %d", vm_->wordSegment[wp_ + 1]);
         }
         fprintf(stdout, "\n");
     }
 
-    if( functions[word].native ) {
-        functions[word].native(this);
-        ++wp;
+    if( vm_->functions[word].native ) {
+        vm_->functions[word].native(this);
+        ++wp_;
     } else {
-        if(  functions[word].start == -1 ) {
+        if( vm_->functions[word].start == -1 ) {
             throwException(ErrorCase::WORD_NOT_DEFINED, "ERROR: word not defined");
             return;
         } else {
-            if( verboseDebugging ) {
-                fprintf(stdout, "%s:\n", functions[word].name.c_str());
+            if( vm_->verboseDebugging ) {
+                fprintf(stdout, "%s:\n", vm_->functions[word].name.c_str());
             }
             setCall(word);
         }

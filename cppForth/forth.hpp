@@ -137,29 +137,29 @@ struct VM : public RCObject {
         setCall(uint32_t word) {
             RetEntry re;
             re.word = word;
-            re.ip = wp;
-            re.lp = lp;
+            re.ip = wp_;
+            re.lp = lp_;
             returnStack_.push_back(re);
-            wp  = vm_->functions[word].start;
-            lp  = localStack_.size();
-            localStack_.resize(lp + vm_->functions[word].localCount);
+            wp_ = vm_->functions[word].start;
+            lp_ = localStack_.size();
+            localStack_.resize(lp_ + vm_->functions[word].localCount);
         }
 
         inline void
         setRet() {
             uint32_t word = returnStack_.back().word;
-            wp = returnStack_.back().ip;
-            lp  = returnStack_.back().lp;
+            wp_ = returnStack_.back().ip;
+            lp_  = returnStack_.back().lp;
             localStack_.resize(localStack_.size() - vm_->functions[word].localCount);
             returnStack_.pop_back();
         }
 
-        inline void     setBranch(uint32_t addr)    { wp = addr; }
+        inline void     setBranch(uint32_t addr)    { wp_ = addr; }
 
-        uint32_t        fetch()                     { ++wp; return vm_->wordSegment[wp]; } 
+        uint32_t        fetch()                     { ++wp_; return vm_->wordSegment[wp_]; } 
 
-        uint32_t                                wp;             // instruction pointer
-        uint32_t                                lp;             // local pointer
+        uint32_t                                wp_;            // instruction pointer
+        uint32_t                                lp_;            // local pointer
 
         VM*                                     vm_;            // the virtual machine this process belongs to
         Process*                                parent_;        // parent process
@@ -167,6 +167,8 @@ struct VM : public RCObject {
         Vector<Value>                           valueStack_;    // contains values on the stack
         Vector<RetEntry>                        returnStack_;   // contains calling word pointer
         Vector<Value>                           localStack_;    // local block stack
+
+        friend struct Primitives;
     };
 
     int32_t         findWord(const String& name);
