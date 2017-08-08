@@ -142,27 +142,27 @@ VM::throwException(ErrorCase err, const String& str) {
 }
 
 void
-VM::runCall(uint32_t word) {
+VM::Process::runCall(uint32_t word) {
     size_t    startExceptionSize = exceptionStack.size();
 
-    if( word > functions.size() ) {
+    if( word > vm_->functions.size() ) {
         throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
         return;
     }
 
     // IF verbose debugging AND IF function id exists
-    if( verboseDebugging ) {
-        fprintf(stdout, "%s:\n", functions[word].name.c_str());
+    if( vm_->verboseDebugging ) {
+        fprintf(stdout, "%s:\n", vm_->functions[word].name.c_str());
     }
 
-    if( functions[word].native && sig == Signal::NONE ) {
-        functions[word].native(this);
+    if( vm_->functions[word].native && sig_ == Signal::NONE ) {
+        vm_->functions[word].native(this);
     } else {
-        uint32_t    rsPos   = returnStack.size();
+        uint32_t    rsPos   = returnStack_.size();
 
         setCall(word);
 
-        while( returnStack.size() != rsPos && exceptionStack.size() <= startExceptionSize && sig == Signal::NONE ) {
+        while( returnStack_.size() != rsPos && exceptionStack.size() <= startExceptionSize && sig_ == Signal::NONE ) {
             step();
         }
     }
@@ -217,7 +217,9 @@ VM::loadStream(IInputStream::Ptr strm) {
     streams.pop_back();
 }
 
-VM::VM() : wp(0), lp(0), sig(Signal::NONE), verboseDebugging(false) {
+VM::Process::Process() :  wp_(0), lp_(0) {}
+
+VM::VM() : sig(Signal::NONE), verboseDebugging(false) {
     initPrimitives();
 }
 

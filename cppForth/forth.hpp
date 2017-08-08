@@ -131,7 +131,10 @@ struct VM : public RCObject {
         inline void     popValue()              { valueStack_.pop_back(); }
 
         void            step();
+        void            runCall(uint32_t word);
     
+        Process();
+
     private:
         inline void
         setCall(uint32_t word) {
@@ -160,6 +163,7 @@ struct VM : public RCObject {
 
         uint32_t                                wp_;            // instruction pointer
         uint32_t                                lp_;            // local pointer
+        Signal                                  sig_;           // high priority interrupt
 
         VM*                                     vm_;            // the virtual machine this process belongs to
         Process*                                parent_;        // parent process
@@ -179,7 +183,6 @@ struct VM : public RCObject {
 
 
     String          getToken();
-    void            runCall(uint32_t word);
 
 
     inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(wordSegment.size()); wordSegment.push_back(word); return pos; }
