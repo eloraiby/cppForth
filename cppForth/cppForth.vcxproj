@@ -166,6 +166,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="primitives.cpp" />
     <ClCompile Include="streams.cpp" />
+    <ClCompile Include="terminal.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.hpp" />

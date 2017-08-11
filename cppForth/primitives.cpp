@@ -19,8 +19,6 @@
 #include <cstdlib>
 
 namespace Forth {
-#define VS_CHECK() \
-    if( proc->valueStack_.size() == 0 ) { /* vm->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow");*/ return; } \
 
 #define VS_POP(V)   \
     if( proc->valueStack_.size() == 0 ) { /* proc->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow");*/ return; } \
@@ -40,31 +38,10 @@ Primitives::returnWord(VM::Process* proc) {
 }
 
 void
-Primitives::wordId(VM::Process* proc) {
-    String name    = proc->getToken();
-    
-    if( vm->isInt(name) ) {
-        vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
-        return;
-    }
-
-    if( vm->nameToWord.find(name) == vm->nameToWord.end() ) {
-        char buff[MAX_BUFF] = {0};
-        sprintf(buff, "ERROR: word not found (%s)", name.c_str());
-        vm->throwException(VM::ErrorCase::WORD_NOT_FOUND, buff);
-        return;
-    }
-    
-    uint32_t    wordId = vm->nameToWord[name];
-    vm->emit(0);
-    vm->emit(wordId);
-}
-
-void
 Primitives::callIndirect(VM::Process* proc) {
     VS_POP(u);
     proc->setCall(u.u32);
-    --proc->wp;   // once outside the native, wp will get incremented, so decrement to stay at the start of the word
+    --proc->wp_;   // once outside the native, wp will get incremented, so decrement to stay at the start of the word
 }
 
 void
@@ -79,50 +56,6 @@ Primitives::printChar(VM::Process* proc) {
     fprintf(stdout, "%c", static_cast<char>(v.i32));
 }
 
-void
-Primitives::defineWord(VM::Process* proc) {
-
-    String name    = vm->getToken();
-
-    if( VM::isInt(name) ) {
-        vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
-    } else {
-        //
-        // TODO:    do we want to allow forward declaration ?
-        //          In this case, we should test to see if the functions[nameToWord[name]].start == -1 && .native == nullptr
-        //          before setting the the old function to a value
-        //
-        uint32_t    wordId  = static_cast<uint32_t>(vm->functions.size());
-
-        VM::Function    func;
-
-        func.name   = name;
-
-        func.start  = vm->wordSegment.size();
-        vm->functions.push_back(func);
-
-        vm->nameToWord[name]    = wordId;
-        
-        vm->stream()->setMode(IInputStream::Mode::COMPILE);
-    }
-}
-
-void
-Primitives::immediate(VM::Process* proc) {
-    proc->vm_->functions[proc->vm_->functions.size() - 1].isImmediate = true;
-}
-
-void
-Primitives::setLocalCount(VM::Process* proc) {
-    String tok  = vm->getToken();
-
-    if( !VM::isInt(tok) ) {
-        vm->throwException(VM::ErrorCase::LOCAL_IS_NOT_INT, "a local should be an integer");
-        return;
-    }
-
-    vm->functions[vm->functions.size() - 1].localCount = VM::toInt32(tok);
-}
 
 void
 Primitives::addInt32(VM::Process* proc) {
@@ -177,14 +110,12 @@ Primitives::branchIf(VM::Process* proc) {
 
 void
 Primitives::dup(VM::Process* proc) {
-    VS_CHECK()
     VM::Value val   = proc->topValue();
     proc->pushValue(val);
 }
 
 void
 Primitives::drop(VM::Process* proc) {
-    VS_CHECK()
     proc->popValue();
 }
 
@@ -203,11 +134,6 @@ Primitives::codeSize(VM::Process* proc) {
     proc->pushValue(v);
 }
 
-void
-Primitives::endWord(VM::Process* proc) {
-    vm->stream()->setMode(IInputStream::Mode::EVAL);
-    vm->emit(1);
-}
 
 void
 Primitives::emitWord(VM::Process* proc) {
@@ -225,25 +151,6 @@ void
 Primitives::emitException(VM::Process* proc) {
     VS_POP(v);
     proc->exceptionStack.push_back(VM::Error(static_cast<VM::ErrorCase>(v.i32), ""));
-}
-
-void
-Primitives::streamPeek(VM::Process* proc) {
-    // TODO: handle stream error (does not exist)
-    VM::Value v(static_cast<uint32_t>(vm->stream()->peekChar()));
-    vm->push(v);
-}
-
-void
-Primitives::streamGetCH(VM::Process* proc) {
-    // TODO: handle stream error (does not exist)
-    VM::Value v(static_cast<uint32_t>(vm->stream()->getChar()));
-    vm->push(v);
-}
-
-void
-Primitives::streamToken(VM::Process* proc) {
-    // TODO: when strings are ready
 }
 
 void
@@ -352,23 +259,23 @@ Primitives::lsFetch(VM::Process* proc) {
 
     uint32_t lp     = proc->lp_ + addr.u32;
 
-    VM::Value v = vm->localStack[lp];
-    vm->push(v);
+    VM::Value v = proc->localStack_[lp];
+    proc->pushValue(v);
 }
 
 void
 Primitives::wsFetch(VM::Process* proc) {
     VS_POP(addr);
 
-    VM::Value v(static_cast<int32_t>(vm->wordSegment[addr.i32]));
-    vm->push(v);
+    VM::Value v(static_cast<int32_t>(proc->vm_->wordSegment[addr.i32]));
+    proc->pushValue(v);
 }
 
 void
 Primitives::cdsFetch(VM::Process* proc) {
     VS_POP(addr);
-    VM::Value v = vm->constDataSegment[addr.i32];
-    vm->push(v);
+    VM::Value v = proc->vm_->constDataSegment[addr.i32];
+    proc->pushValue(v);
 }
 
 void
@@ -383,7 +290,7 @@ Primitives::vsStore(VM::Process* proc) {
     VS_POP(addr);
     VS_POP(v);
 
-    vm->valueStack[addr.i32] = v;
+    proc->valueStack_[addr.i32] = v;
 }
 
 void
@@ -391,9 +298,9 @@ Primitives::lsStore(VM::Process* proc) {
     VS_POP(addr);
     VS_POP(v);
 
-    uint32_t lp     = vm->lp + addr.u32;
+    uint32_t lp     = proc->lp_ + addr.u32;
 
-    vm->localStack[lp] = v;
+    proc->localStack_[lp] = v;
 }
 
 void
@@ -401,7 +308,7 @@ Primitives::wsStore(VM::Process* proc) {
     VS_POP(addr);
     VS_POP(v);
 
-    vm->wordSegment[addr.i32] = v.u32;
+    proc->vm_->wordSegment[addr.i32] = v.u32;
 }
 
 void
@@ -409,7 +316,7 @@ Primitives::cdsStore(VM::Process* proc) {
     VS_POP(addr);
     VS_POP(v);
 
-    vm->constDataSegment[addr.i32] = v;
+    proc->vm_->constDataSegment[addr.i32] = v;
 }
 
 void
@@ -422,7 +329,7 @@ Primitives::esStore(VM::Process* proc) {
 
 void
 Primitives::bye(VM::Process* proc) {
-    vm->sig = VM::Signal::ABORT;
+    proc->sig_ = VM::Signal::ABORT;
 }
 
 void
@@ -433,35 +340,9 @@ Primitives::exit(VM::Process* proc) {
 
 void
 Primitives::showValueStack(VM::Process* proc) {
-    for( size_t i = 0; i < vm->valueStack.size(); ++i ) {
-        fprintf(stdout, "vs@%d -- 0x%X\n", i, vm->valueStack[i].u32);
+    for( size_t i = 0; i < proc->valueStack_.size(); ++i ) {
+        fprintf(stdout, "vs@%d -- 0x%X\n", i, proc->valueStack_[i].u32);
     }
-}
-
-void
-Primitives::see(VM::Process* proc) {
-    uint32_t    word    = vm->nameToWord[vm->getToken()];
-    fprintf(stdout, "[%d] : %s ", word, vm->functions[word].name.c_str());
-    if( vm->functions[word].native ) {
-         fprintf(stdout, " <native> ");
-    } else {
-        int32_t     curr    = vm->functions[word].start;
-        while( vm->wordSegment[curr] != 1 ) {
-            if( vm->wordSegment[curr] == 0 ) {
-                fprintf(stdout, "%d ", vm->wordSegment[++curr]);
-            } else {
-                fprintf(stdout, "@%d:%s ", curr, vm->functions[vm->wordSegment[curr]].name.c_str());
-            }
-
-            ++curr;
-        }
-    }
-
-    if( vm->functions[word].isImmediate ) {
-        fprintf(stdout, "immediate");
-    }
-
-    fprintf(stdout, "\n");
 }
 
 void

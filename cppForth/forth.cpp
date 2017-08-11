@@ -48,50 +48,8 @@ VM::addNativeFunction(const String& name, NativeFunction native, bool isImmediat
 
 
 ////////////////////////////////////////////////////////////////////////////////
-// parsing & runtime
+// runtime
 ////////////////////////////////////////////////////////////////////////////////
-bool
-VM::isInt(const String& tok) {
-    uint32_t    pos = 0;
-    
-    while( pos < tok.size() ) {
-        if( tok[pos] < '0' || tok[pos] > '9' ) {
-            return false;
-        }
-
-        ++pos;
-    }
-
-    return true;
-}
-
-int32_t
-VM::toInt32(const String& tok) {
-    uint32_t    pos = 0;
-    uint32_t    val = 0;
-    
-    while( pos < tok.size() ) {
-        val = val * 10 + (tok[pos] - '0');
-        ++pos;
-    }
-
-    return val;
-}
-
-String
-VM::getToken() {
-    String ret;
-    
-    // remove white space
-    while( stream()->peekChar() && IInputStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
-    
-    // get token
-    while( stream()->peekChar() && !IInputStream::isSpace(stream()->peekChar()) ) {
-        ret += stream()->getChar();
-    }
-
-    return ret;
-}
 
 void
 VM::Process::step() {
@@ -168,54 +126,6 @@ VM::Process::runCall(uint32_t word) {
     }
 }
 
-void
-VM::loadStream(IInputStream::Ptr strm) {
-    streams.push_back(strm);
-    size_t    startExceptionSize = exceptionStack.size();
-
-    while( stream()->peekChar() && exceptionStack.size() <= startExceptionSize && sig == Signal::NONE ) {
-        String tok = getToken();
-
-        switch( stream()->getMode() ) {
-        case IInputStream::Mode::EVAL:
-            if( isInt(tok) ) {
-                Value v(toInt32(tok));
-                valueStack.push_back(v);
-            } else {
-                if( nameToWord.find(tok) == nameToWord.end() ) {
-                    char buff[MAX_BUFF] = {0};
-                    sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
-                    throwException(ErrorCase::WORD_NOT_FOUND, buff);
-                } else {
-                    runCall(nameToWord[tok]);
-                }
-            }
-            break;
-
-        case IInputStream::Mode::COMPILE:
-            if( isInt(tok) ) {
-                emit(0);
-                emit(Value(toInt32(tok)).u32);
-            } else {
-                if( nameToWord.find(tok) == nameToWord.end() ) {
-                    char buff[MAX_BUFF] = {0};
-                    sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
-                    throwException(ErrorCase::WORD_NOT_FOUND, buff);
-                } else {
-                    uint32_t    word    = nameToWord[tok];
-                    if( functions[word].isImmediate ) {
-                        runCall(word);
-                    } else {
-                        emit(word);
-                    }
-                }
-            }
-            break;
-        }
-    }
-
-    streams.pop_back();
-}
 
 VM::Process::Process() :  wp_(0), lp_(0) {}
 
@@ -237,11 +147,7 @@ VM::initPrimitives() {
     Primitive primitives[] = {
         { "lit.i32"     , Primitives::fetchInt32    , false },
         { "return"      , Primitives::returnWord    , false },
-        { "'"           , Primitives::wordId        , true  },
         { "#"           , Primitives::callIndirect  , false },
-        { ":"           , Primitives::defineWord    , false },
-        { "immediate"   , Primitives::immediate     , true  },
-        { "locals"      , Primitives::setLocalCount , true  },
         { "."           , Primitives::printInt32    , false },
         { ".c"          , Primitives::printChar     , false },
         { "+"           , Primitives::addInt32      , false },
@@ -255,13 +161,11 @@ VM::initPrimitives() {
         { "drop"        , Primitives::drop          , false },
         { "swap"        , Primitives::swap          , false },
         { "code.size"   , Primitives::codeSize      , false },
-        { ";"           , Primitives::endWord       , true  },
         { "w>"          , Primitives::emitWord      , false },
         { "cd>"         , Primitives::emitConstData , false },
         { "e>"          , Primitives::emitException , false },
 
-        { "stream.peek" , Primitives::streamPeek    , false },
-        { "stream.getch", Primitives::streamGetCH   , false },
+
         
         { "=="          , Primitives::ieq           , false },
         { "=/="         , Primitives::ineq          , false },
@@ -294,9 +198,16 @@ VM::initPrimitives() {
         { "exit"        , Primitives::exit          , false },
 
         { ".s"          , Primitives::showValueStack, false },
-        { "see"         , Primitives::see           , false },
         { "deb.set"     , Primitives::setDebugMode  , false },
 
+        { "'"           , Terminal::wordId          , true  },
+        { ":"           , Terminal::defineWord      , false },
+        { ";"           , Terminal::endWord         , true  },
+        { "immediate"   , Terminal::immediate       , true  },
+        { "locals"      , Terminal::setLocalCount   , true  },
+        { "stream.peek" , Terminal::streamPeek      , false },
+        { "stream.getch", Terminal::streamGetCH     , false },
+        { "see"         , Terminal::see             , false },
     };
 
     for(Primitive p : primitives) {

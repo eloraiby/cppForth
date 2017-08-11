@@ -59,41 +59,33 @@ struct VM : public RCObject {
 
     struct Process;
 
-    enum class ErrorCase {
-        WORD_NOT_FOUND          = -1,
-        VS_UNDERFLOW            = -2,
-        VS_OVERFLOW             = -3,
-        RS_UNDERFLOW            = -4,
-        RS_OVERFLOW             = -5,
-        WORD_NOT_DEFINED        = -6,
-        INT_IS_NO_WORD          = -7,
-        WORD_ID_OUT_OF_RANGE    = -8,
-        LOCAL_IS_NOT_INT        = -9,
-        LOCAL_OVERFLOW          = -10,
-    };
-
     enum class Signal {
         NONE                    =  0,   // continue execution
         KILL                    = -1,   // killed
         ABORT                   = -2,   // abort execution
-        BREAK                   = -3,   // breakpoint
     };
 
-    struct Error {
-        ErrorCase           errorCase;
-        String              errorString;
+    struct Signal {
+        enum Type {
+            NONE                    =  0,   // continue execution
+            KILL                    = -1,   // killed
+            ABORT                   = -2,   // abort execution
+        };
 
-        Error(ErrorCase ec, const String& str) : errorCase(ec), errorString(str) {}
+        Type                ty;     // signal type
+        uint32_t            pid;    // originating process id
+        uint32_t            data;   // signal data
+
+        Signal(Type ty, uint32_t pid, uint32_t data) : ty(ty), pid(pid), data(data) {}
     };
 
     ///
     /// return stack entry
     ///
     struct RetEntry {
-        uint32_t            word;
-        uint32_t            ip;
-        uint32_t            lp;
-        uint32_t            as;
+        uint32_t            word;   // calling word
+        uint32_t            ip; // global text (code) instruction pointer
+        uint32_t            lp; // local pointer
         uint32_t            cp; // exception catcher (catch pointer)
     };
 
@@ -135,7 +127,7 @@ struct VM : public RCObject {
     
         Process();
 
-    private:
+    protected:
         inline void
         setCall(uint32_t word) {
             RetEntry re;
@@ -176,14 +168,9 @@ struct VM : public RCObject {
     };
 
     int32_t         findWord(const String& name);
-    void            loadStream(IInputStream::Ptr stream);
 
 
     inline uint32_t wordAddr(uint32_t word)     { return functions[word].start; }
-
-
-    String          getToken();
-
 
     inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(wordSegment.size()); wordSegment.push_back(word); return pos; }
 
@@ -195,15 +182,7 @@ struct VM : public RCObject {
 
 private:
 
-    
-    inline IInputStream::Ptr    stream() const  { return streams.back(); }
-    inline void     pushStream(IInputStream::Ptr strm)  { streams.push_back(strm); }
-    inline void     popStream()                 { streams.pop_back(); }
-
     void            initPrimitives();
-
-    static bool     isInt(const String& tok);
-    static int32_t  toInt32(const String& tok);
 
     Vector<Function>                            functions;
     HashMap<String, uint32_t>                   nameToWord;
@@ -211,7 +190,6 @@ private:
     Vector<uint32_t>                            wordSegment;    // the code segment
     Vector<Value>                               constDataSegment;   // strings, names, ...
 
-    Vector<IInputStream::Ptr>                   streams;
 
     Signal                                      sig;
 
@@ -220,6 +198,7 @@ private:
 
 
     friend struct   Primitives;
+    friend struct   Terminal;
 };
 
 struct StdInStream : public IInputStream {
@@ -252,78 +231,94 @@ struct StringStream : public IInputStream {
     Forth::String   buff;
 };
 
+struct Terminal : public VM::Process {
+    static void     wordId          (VM::Process* proc);
+    static void     defineWord      (VM::Process* proc);
+    static void     immediate       (VM::Process* proc);
+    static void     setLocalCount   (VM::Process* proc);
+    static void     endWord         (VM::Process* proc);
+    static void     see             (VM::Process* proc);
+    static void     streamPeek      (VM::Process* proc);
+    static void     streamGetCH     (VM::Process* proc);
+    static void     streamToken     (VM::Process* proc);
+
+private:
+    String          getToken();
+    void            loadStream(IInputStream::Ptr stream);
+
+    inline IInputStream::Ptr    stream() const  { return streams_.back(); }
+    inline void     pushStream(IInputStream::Ptr strm)  { streams_.push_back(strm); }
+    inline void     popStream()                 { streams_.pop_back(); }
+
+    Vector<IInputStream::Ptr>                   streams_;
+
+    static bool     isInt(const String& tok);
+    static int32_t  toInt32(const String& tok);
+
+
+
+};
+
 struct Primitives {
     // primitives
-    static void     fetchInt32      (VM::Process* vm);
-    static void     returnWord      (VM::Process* vm);
-    static void     wordId          (VM::Process* vm);
-    static void     callIndirect    (VM::Process* vm);
+    static void     fetchInt32      (VM::Process* proc);
+    static void     returnWord      (VM::Process* proc);
+    static void     callIndirect    (VM::Process* proc);
 
-    static void     printInt32      (VM::Process* vm);
-    static void     printChar       (VM::Process* vm);
-    static void     defineWord      (VM::Process* vm);
-    static void     immediate       (VM::Process* vm);
-    static void     setLocalCount   (VM::Process* vm);
-    static void     addInt32        (VM::Process* vm);
-    static void     subInt32        (VM::Process* vm);
-    static void     mulInt32        (VM::Process* vm);
-    static void     divInt32        (VM::Process* vm);
-    static void     modInt32        (VM::Process* vm);
-    static void     branch          (VM::Process* vm);
-    static void     branchIf        (VM::Process* vm);
-    static void     dup             (VM::Process* vm);
-    static void     drop            (VM::Process* vm);
-    static void     swap            (VM::Process* vm);
-    static void     codeSize        (VM::Process* vm);
-    static void     endWord         (VM::Process* vm);
+    static void     printInt32      (VM::Process* proc);
+    static void     printChar       (VM::Process* proc);
+    static void     addInt32        (VM::Process* proc);
+    static void     subInt32        (VM::Process* proc);
+    static void     mulInt32        (VM::Process* proc);
+    static void     divInt32        (VM::Process* proc);
+    static void     modInt32        (VM::Process* proc);
+    static void     branch          (VM::Process* proc);
+    static void     branchIf        (VM::Process* proc);
+    static void     dup             (VM::Process* proc);
+    static void     drop            (VM::Process* proc);
+    static void     swap            (VM::Process* proc);
+    static void     codeSize        (VM::Process* proc);
 
-    static void     emitWord        (VM::Process* vm);
-    static void     emitConstData   (VM::Process* vm);
-    static void     emitException   (VM::Process* vm);
+    static void     emitWord        (VM::Process* proc);
+    static void     emitConstData   (VM::Process* proc);
+    static void     emitException   (VM::Process* proc);
 
-    static void     streamPeek      (VM::Process* vm);
-    static void     streamGetCH     (VM::Process* vm);
-    static void     streamToken     (VM::Process* vm);
-
-    static void     ieq             (VM::Process* vm);
-    static void     ineq            (VM::Process* vm);
-    static void     igt             (VM::Process* vm);
-    static void     ilt             (VM::Process* vm);
-    static void     igeq            (VM::Process* vm);
-    static void     ileq            (VM::Process* vm);
-    static void     notBW           (VM::Process* vm);
-    static void     andBW           (VM::Process* vm);
-    static void     orBW            (VM::Process* vm);
+    static void     ieq             (VM::Process* proc);
+    static void     ineq            (VM::Process* proc);
+    static void     igt             (VM::Process* proc);
+    static void     ilt             (VM::Process* proc);
+    static void     igeq            (VM::Process* proc);
+    static void     ileq            (VM::Process* proc);
+    static void     notBW           (VM::Process* proc);
+    static void     andBW           (VM::Process* proc);
+    static void     orBW            (VM::Process* proc);
 
     // machine stacks
-    static void     vsPtr           (VM::Process* vm);
-    static void     rsPtr           (VM::Process* vm);
-    static void     wsPtr           (VM::Process* vm);
-    static void     cdsPtr          (VM::Process* vm);
-    static void     esPtr           (VM::Process* vm);
+    static void     vsPtr           (VM::Process* proc);
+    static void     rsPtr           (VM::Process* proc);
+    static void     wsPtr           (VM::Process* proc);
+    static void     cdsPtr          (VM::Process* proc);
+    static void     esPtr           (VM::Process* proc);
 
-    static void     vsFetch         (VM::Process* vm);
-    static void     rsFetch         (VM::Process* vm);
-    static void     lsFetch         (VM::Process* vm);
-    static void     wsFetch         (VM::Process* vm);
-    static void     cdsFetch        (VM::Process* vm);
-    static void     esFetch         (VM::Process* vm);
+    static void     vsFetch         (VM::Process* proc);
+    static void     rsFetch         (VM::Process* proc);
+    static void     lsFetch         (VM::Process* proc);
+    static void     wsFetch         (VM::Process* proc);
+    static void     cdsFetch        (VM::Process* proc);
+    static void     esFetch         (VM::Process* proc);
 
-    static void     vsStore         (VM::Process* vm);
-    static void     lsStore         (VM::Process* vm);
-    static void     wsStore         (VM::Process* vm);
-    static void     cdsStore        (VM::Process* vm);
-    static void     esStore         (VM::Process* vm);
+    static void     vsStore         (VM::Process* proc);
+    static void     lsStore         (VM::Process* proc);
+    static void     wsStore         (VM::Process* proc);
+    static void     cdsStore        (VM::Process* proc);
+    static void     esStore         (VM::Process* proc);
 
-
-
-    static void     bye             (VM::Process* vm);
-    static void     exit            (VM::Process* vm);
+    static void     bye             (VM::Process* proc);
+    static void     exit            (VM::Process* proc);
 
     // debug helpers
-    static void     showValueStack  (VM::Process* vm);
-    static void     see             (VM::Process* vm);
-    static void     setDebugMode    (VM::Process* vm);
+    static void     showValueStack  (VM::Process* proc);
+    static void     setDebugMode    (VM::Process* proc);
 };
 }
 
