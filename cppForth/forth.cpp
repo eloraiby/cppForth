@@ -37,8 +37,7 @@ VM::addNativeFunction(const String& name, NativeFunction native, bool isImmediat
 
     func.name   = name;
 
-    func.start  = -1;
-    func.native = native;
+    func.body.native = native;
     func.isImmediate    = isImmediate;
     functions.push_back(func);
     nameToWord[name]    = wordId;
@@ -68,11 +67,11 @@ VM::Process::step() {
         fprintf(stdout, "\n");
     }
 
-    if( vm_->functions[word].native ) {
-        vm_->functions[word].native(this);
+    if( vm_->functions[word].color == VM::Function::Color::NATIVE ) {
+        vm_->functions[word].body.native(this);
         ++wp_;
     } else {
-        if( vm_->functions[word].start == -1 ) {
+        if( vm_->functions[word].body.interpreted.start == -1 ) {
             emitSignal(VM::Process::Signal(VM::Process::Signal::WORD_NOT_IMPLEMENTED, pid_, 0));
             return;
         } else {
@@ -106,8 +105,8 @@ VM::Process::runCall(uint32_t word) {
         fprintf(stdout, "%s:\n", vm_->functions[word].name.c_str());
     }
 
-    if( vm_->functions[word].native && sig_.ty == Signal::NONE ) {
-        vm_->functions[word].native(this);
+    if( vm_->functions[word].color == VM::Function::Color::NATIVE && sig_.ty == Signal::NONE ) {
+        vm_->functions[word].body.native(this);
     } else {
         uint32_t    rsPos   = returnStack_.size();
 
@@ -120,7 +119,7 @@ VM::Process::runCall(uint32_t word) {
 }
 
 
-VM::Process::Process(uint32_t pid) :  sig_(VM::Process::Signal::NONE), pid_(pid), wp_(0), lp_(0) {}
+VM::Process::Process(uint32_t pid) :  sig_(Signal(VM::Process::Signal::NONE, 0, 0)), pid_(pid), wp_(0), lp_(0) {}
 
 VM::VM() : verboseDebugging(false) {
     initPrimitives();

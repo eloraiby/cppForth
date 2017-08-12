@@ -62,14 +62,29 @@ struct VM : public RCObject {
     typedef void    (*NativeFunction)(Process* proc);
 
     struct Function {
+        enum Color {
+            NATIVE                      = 0,    // native function
+            NORMAL                      = 1,    // normal interpreted
+        };
+
         String              name;           // keep this even in release for debugging purpose
+        Color               color;
+        bool                isImmediate;    // this is only needed in the parsing phase, it will simplify the interpreter later
 
-        bool                isImmediate;
-        NativeFunction      native;
-        int32_t             start;
-        uint32_t            localCount;
+        union {
+            NativeFunction      native;
+            struct {
+                int32_t             start;
+                uint32_t            localCount;
+            } interpreted;
+        } body;
 
-        Function() : isImmediate(false), native(nullptr), start(-1), localCount(0) {}
+        inline bool             isNative() const { return color == NATIVE; }
+
+        Function() : color(NATIVE) {
+            body.native = nullptr;
+            body.interpreted.localCount = 0;
+        }
     };
 
     struct Process : public RCObject {
@@ -133,9 +148,9 @@ struct VM : public RCObject {
             re.ip = wp_;
             re.lp = lp_;
             returnStack_.push_back(re);
-            wp_ = vm_->functions[word].start;
+            wp_ = vm_->functions[word].body.interpreted.start;
             lp_ = localStack_.size();
-            localStack_.resize(lp_ + vm_->functions[word].localCount);
+            localStack_.resize(lp_ + vm_->functions[word].body.interpreted.localCount);
         }
 
         inline void
@@ -143,7 +158,7 @@ struct VM : public RCObject {
             uint32_t word = returnStack_.back().word;
             wp_ = returnStack_.back().ip;
             lp_  = returnStack_.back().lp;
-            localStack_.resize(localStack_.size() - vm_->functions[word].localCount);
+            localStack_.resize(localStack_.size() - vm_->functions[word].body.interpreted.localCount);
             returnStack_.pop_back();
         }
 
@@ -170,7 +185,7 @@ struct VM : public RCObject {
     int32_t         findWord(const String& name);
 
 
-    inline uint32_t wordAddr(uint32_t word)     { return functions[word].start; }
+    inline uint32_t wordAddr(uint32_t word)     { return functions[word].body.interpreted.start; }
 
     inline uint32_t emit(uint32_t word)         { uint32_t pos = static_cast<uint32_t>(wordSegment.size()); wordSegment.push_back(word); return pos; }
 

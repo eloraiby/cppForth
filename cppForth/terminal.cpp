@@ -158,7 +158,7 @@ Terminal::defineWord(VM::Process* proc) {
 
         func.name   = name;
 
-        func.start  = term->vm_->wordSegment.size();
+        func.body.interpreted.start  = term->vm_->wordSegment.size();
         term->vm_->functions.push_back(func);
 
         term->vm_->nameToWord[name]    = wordId;
@@ -183,7 +183,7 @@ Terminal::setLocalCount(VM::Process* proc) {
         return;
     }
 
-    term->vm_->functions[term->vm_->functions.size() - 1].localCount = Terminal::toInt32(tok);
+    term->vm_->functions[term->vm_->functions.size() - 1].body.interpreted.localCount = Terminal::toInt32(tok);
 }
 
 void
@@ -196,7 +196,7 @@ Terminal::endWord(VM::Process* proc) {
 void
 Terminal::streamPeek(VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
-    // TODO: handle stream error (does not exist)
+    // TODO: handle stream error (if it does not exist)
     Value v(static_cast<uint32_t>(term->stream()->peekChar()));
     term->pushValue(v);
 }
@@ -220,10 +220,10 @@ Terminal::see(VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     uint32_t    word    = term->vm_->nameToWord[term->getToken()];
     fprintf(stdout, "[%d] : %s ", word, term->vm_->functions[word].name.c_str());
-    if( term->vm_->functions[word].native ) {
+    if( term->vm_->functions[word].color == VM::Function::Color::NATIVE ) {
          fprintf(stdout, " <native> ");
     } else {
-        int32_t     curr    = term->vm_->functions[word].start;
+        int32_t     curr    = term->vm_->functions[word].body.interpreted.start;
         while( term->vm_->wordSegment[curr] != 1 ) {
             if( term->vm_->wordSegment[curr] == 0 ) {
                 fprintf(stdout, "%d ", term->vm_->wordSegment[++curr]);
