@@ -80,6 +80,9 @@ struct VM : public RCObject {
                 NONE                    =  0,   // no sginal, all normal
                 EXIT                    = -1,   // exit normally
                 EXCEPTION               = -2,   // exception
+                WORD_ID_OUT_OF_RANGE    = -3,   // code segment fault
+                WORD_NOT_IMPLEMENTED    = -4,   // the function is not implemented (TODO: should this be on the parser end only ?)
+
             };
 
             Type                ty;     // signal type

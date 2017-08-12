@@ -56,7 +56,7 @@ VM::Process::step() {
     uint32_t    word    = vm_->wordSegment[wp_];
         
     if( word > vm_->functions.size() ) {
-        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
+        emitSignal(VM::Process::Signal(VM::Process::Signal::WORD_ID_OUT_OF_RANGE, pid_, 0));
         return;
     }
 
@@ -73,7 +73,7 @@ VM::Process::step() {
         ++wp_;
     } else {
         if( vm_->functions[word].start == -1 ) {
-            throwException(ErrorCase::WORD_NOT_DEFINED, "ERROR: word not defined");
+            emitSignal(VM::Process::Signal(VM::Process::Signal::WORD_NOT_IMPLEMENTED, pid_, 0));
             return;
         } else {
             if( vm_->verboseDebugging ) {
@@ -85,26 +85,19 @@ VM::Process::step() {
 }
 
 void
-VM::Process::emitSignal(const VM::Signal& sig) {
-    exceptionStack.push_back(Error(err, str));
+VM::Process::emitSignal(const VM::Process::Signal& sig) {
+    sig_    = sig;
 
-    fprintf(stderr, "%s\n", str.c_str());
-
-    for( int i = returnStack.size() - 1; i >= 0 ; --i ) {
-        fprintf(stderr, "\t@[%d] - %s\n", returnStack[i].word, functions[returnStack[i].word].name.c_str());
+    for( int i = returnStack_.size() - 1; i >= 0 ; --i ) {
+        fprintf(stderr, "\t@[%d] - %s\n", returnStack_[i].word, vm_->functions[returnStack_[i].word].name.c_str());
     }
-
-    // TODO: switch to debug stream (debugging stream)
-    // popStream();
-    stream()->setMode(IInputStream::Mode::EVAL);
 }
 
 void
 VM::Process::runCall(uint32_t word) {
-    size_t    startExceptionSize = exceptionStack.size();
 
     if( word > vm_->functions.size() ) {
-        throwException(ErrorCase::WORD_ID_OUT_OF_RANGE, "ERROR: word outside code segment");
+        emitSignal(VM::Process::Signal(VM::Process::Signal::WORD_ID_OUT_OF_RANGE, pid_, 0));
         return;
     }
 
@@ -113,23 +106,23 @@ VM::Process::runCall(uint32_t word) {
         fprintf(stdout, "%s:\n", vm_->functions[word].name.c_str());
     }
 
-    if( vm_->functions[word].native && sig_ == Signal::NONE ) {
+    if( vm_->functions[word].native && sig_.ty == Signal::NONE ) {
         vm_->functions[word].native(this);
     } else {
         uint32_t    rsPos   = returnStack_.size();
 
         setCall(word);
 
-        while( returnStack_.size() != rsPos && exceptionStack.size() <= startExceptionSize && sig_ == Signal::NONE ) {
+        while( returnStack_.size() != rsPos && sig_.ty == Signal::NONE ) {
             step();
         }
     }
 }
 
 
-VM::Process::Process(uint32_t pid) :  pid_(pid), wp_(0), lp_(0) {}
+VM::Process::Process(uint32_t pid) :  sig_(VM::Process::Signal::NONE), pid_(pid), wp_(0), lp_(0) {}
 
-VM::VM() : sig(Signal::NONE), verboseDebugging(false) {
+VM::VM() : verboseDebugging(false) {
     initPrimitives();
 }
 
