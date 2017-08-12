@@ -85,7 +85,7 @@ VM::Process::step() {
 }
 
 void
-VM::throwException(ErrorCase err, const String& str) {
+VM::Process::emitSignal(const VM::Signal& sig) {
     exceptionStack.push_back(Error(err, str));
 
     fprintf(stderr, "%s\n", str.c_str());
@@ -127,7 +127,7 @@ VM::Process::runCall(uint32_t word) {
 }
 
 
-VM::Process::Process() :  wp_(0), lp_(0) {}
+VM::Process::Process(uint32_t pid) :  pid_(pid), wp_(0), lp_(0) {}
 
 VM::VM() : sig(Signal::NONE), verboseDebugging(false) {
     initPrimitives();
@@ -181,18 +181,15 @@ VM::initPrimitives() {
         { "r&"          , Primitives::rsPtr         , false },
         { "w&"          , Primitives::wsPtr         , false },
         { "cd&"         , Primitives::cdsPtr        , false },
-        { "e&"          , Primitives::esPtr         , false },
         { "@"           , Primitives::vsFetch       , false },
         { "r@"          , Primitives::rsFetch       , false },
         { "w@"          , Primitives::wsFetch       , false },
         { "l@"          , Primitives::lsFetch       , false },
         { "cd@"         , Primitives::cdsFetch      , false },
-        { "e@"          , Primitives::esFetch       , false },
         { "!"           , Primitives::vsStore       , false },
         { "w!"          , Primitives::wsStore       , false },
         { "l!"          , Primitives::lsStore       , false },
         { "cd!"         , Primitives::cdsStore      , false },
-        { "e!"          , Primitives::esStore       , false },
         
         { "bye"         , Primitives::bye           , false },
         { "exit"        , Primitives::exit          , false },

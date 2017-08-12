@@ -62,24 +62,26 @@ Terminal::getToken() {
     return ret;
 }
 
+//
+// TODO: this should be implemented in forth directly
+//
 void
 Terminal::loadStream(IInputStream::Ptr strm) {
     streams_.push_back(strm);
-    size_t    startExceptionSize = exceptionStack.size();
 
-    while( stream()->peekChar() && exceptionStack.size() <= startExceptionSize && sig_ == VM::Signal::NONE ) {
+    while( stream()->peekChar() && sig_.ty == Signal::NONE ) {
         String tok = getToken();
 
         switch( stream()->getMode() ) {
         case IInputStream::Mode::EVAL:
             if( isInt(tok) ) {
-                VM::Value v(toInt32(tok));
+                Value v(toInt32(tok));
                 valueStack_.push_back(v);
             } else {
                 if( vm_->nameToWord.find(tok) == vm_->nameToWord.end() ) {
                     char buff[MAX_BUFF] = {0};
                     sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
-                    throwException(VM::ErrorCase::WORD_NOT_FOUND, buff);
+                    emitSignal(Signal(Signal::EXCEPTION, pid_, ErrorCase::WORD_NOT_FOUND));
                 } else {
                     runCall(vm_->nameToWord[tok]);
                 }
@@ -89,12 +91,12 @@ Terminal::loadStream(IInputStream::Ptr strm) {
         case IInputStream::Mode::COMPILE:
             if( isInt(tok) ) {
                 vm_->emit(0);
-                vm_->emit(VM::Value(toInt32(tok)).u32);
+                vm_->emit(Value(toInt32(tok)).u32);
             } else {
                 if( vm_->nameToWord.find(tok) == vm_->nameToWord.end() ) {
                     char buff[MAX_BUFF] = {0};
                     sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
-                    throwException(VM::ErrorCase::WORD_NOT_FOUND, buff);
+                    emitSignal(Signal(Signal::EXCEPTION, pid_, ErrorCase::WORD_NOT_FOUND));
                 } else {
                     uint32_t    word    = vm_->nameToWord[tok];
                     if( vm_->functions[word].isImmediate ) {
@@ -120,14 +122,14 @@ Terminal::wordId(VM::Process* proc) {
     String name    = term->getToken();
     
     if( Terminal::isInt(name) ) {
-        vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
+        term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::INT_IS_NO_WORD));
         return;
     }
 
     if( term->vm_->nameToWord.find(name) == term->vm_->nameToWord.end() ) {
         char buff[MAX_BUFF] = {0};
         sprintf(buff, "ERROR: word not found (%s)", name.c_str());
-        vm->throwException(VM::ErrorCase::WORD_NOT_FOUND, buff);
+        term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::WORD_NOT_FOUND));
         return;
     }
     
@@ -143,7 +145,7 @@ Terminal::defineWord(VM::Process* proc) {
     String name    = term->getToken();
 
     if( Terminal::isInt(name) ) {
-        vm->throwException(VM::ErrorCase::INT_IS_NO_WORD, "Int was used as a word definition");
+        term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::WORD_NOT_FOUND));
     } else {
         //
         // TODO:    do we want to allow forward declaration ?
@@ -177,7 +179,7 @@ Terminal::setLocalCount(VM::Process* proc) {
     String tok  = term->getToken();
 
     if( !Terminal::isInt(tok) ) {
-        vm->throwException(VM::ErrorCase::LOCAL_IS_NOT_INT, "a local should be an integer");
+        term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::LOCAL_IS_NOT_INT));
         return;
     }
 
@@ -195,7 +197,7 @@ void
 Terminal::streamPeek(VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     // TODO: handle stream error (does not exist)
-    VM::Value v(static_cast<uint32_t>(term->stream()->peekChar()));
+    Value v(static_cast<uint32_t>(term->stream()->peekChar()));
     term->pushValue(v);
 }
 
@@ -203,7 +205,7 @@ void
 Terminal::streamGetCH(VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     // TODO: handle stream error (does not exist)
-    VM::Value v(static_cast<uint32_t>(term->stream()->getChar()));
+    Value v(static_cast<uint32_t>(term->stream()->getChar()));
     term->pushValue(v);
 }
 

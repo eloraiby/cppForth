@@ -59,49 +59,6 @@ struct VM : public RCObject {
 
     struct Process;
 
-    enum class Signal {
-        NONE                    =  0,   // continue execution
-        KILL                    = -1,   // killed
-        ABORT                   = -2,   // abort execution
-    };
-
-    struct Signal {
-        enum Type {
-            NONE                    =  0,   // continue execution
-            KILL                    = -1,   // killed
-            ABORT                   = -2,   // abort execution
-        };
-
-        Type                ty;     // signal type
-        uint32_t            pid;    // originating process id
-        uint32_t            data;   // signal data
-
-        Signal(Type ty, uint32_t pid, uint32_t data) : ty(ty), pid(pid), data(data) {}
-    };
-
-    ///
-    /// return stack entry
-    ///
-    struct RetEntry {
-        uint32_t            word;   // calling word
-        uint32_t            ip; // global text (code) instruction pointer
-        uint32_t            lp; // local pointer
-        uint32_t            cp; // exception catcher (catch pointer)
-    };
-
-    union Value {
-        uint32_t            u32;
-        int32_t             i32;
-        float               f32;
-        void*               ptr;
-        
-        Value()                     : u32(0) {}
-        explicit Value(uint32_t v)  : u32(v) {}
-        explicit Value(int32_t v)   : i32(v) {}
-        explicit Value(float v)     : f32(v) {}
-        explicit Value(void* v)     : ptr(v) {}
-    };
-
     typedef void    (*NativeFunction)(Process* proc);
 
     struct Function {
@@ -118,14 +75,52 @@ struct VM : public RCObject {
     struct Process : public RCObject {
         typedef IntrusivePtr<Process>   Ptr;
 
+        struct Signal {
+            enum Type {
+                NONE                    =  0,   // no sginal, all normal
+                EXIT                    = -1,   // exit normally
+                EXCEPTION               = -2,   // exception
+            };
+
+            Type                ty;     // signal type
+            uint32_t            pid;    // originating process id
+            uint32_t            data;   // signal data
+
+            Signal(Type ty, uint32_t pid, uint32_t data) : ty(ty), pid(pid), data(data) {}
+        };
+
+        ///
+        /// return stack entry
+        ///
+        struct RetEntry {
+            uint32_t            word;   // calling word
+            uint32_t            ip; // global text (code) instruction pointer
+            uint32_t            lp; // local pointer
+            uint32_t            cp; // exception catcher (catch pointer)
+        };
+
+        union Value {
+            uint32_t            u32;
+            int32_t             i32;
+            float               f32;
+            void*               ptr;
+        
+            Value()                     : u32(0) {}
+            explicit Value(uint32_t v)  : u32(v) {}
+            explicit Value(int32_t v)   : i32(v) {}
+            explicit Value(float v)     : f32(v) {}
+            explicit Value(void* v)     : ptr(v) {}
+        };
+
         inline void     pushValue(Value v)      { valueStack_.push_back(v); }
         inline Value    topValue() const        { return valueStack_.back(); }
         inline void     popValue()              { valueStack_.pop_back(); }
 
         void            step();
         void            runCall(uint32_t word);
+        void            emitSignal(const Signal& sig);
     
-        Process();
+        Process(uint32_t pid);
 
     protected:
         inline void
@@ -153,6 +148,8 @@ struct VM : public RCObject {
 
         uint32_t        fetch()                     { ++wp_; return vm_->wordSegment[wp_]; } 
 
+        uint32_t                                pid_;           // process id
+
         uint32_t                                wp_;            // instruction pointer
         uint32_t                                lp_;            // local pointer
         Signal                                  sig_;           // high priority interrupt
@@ -176,7 +173,6 @@ struct VM : public RCObject {
 
     uint32_t        addNativeFunction(const String& name, NativeFunction native, bool isImmediate);
 
-    void            throwException(ErrorCase err, const String& str);
 
     VM();
 
@@ -188,10 +184,8 @@ private:
     HashMap<String, uint32_t>                   nameToWord;
 
     Vector<uint32_t>                            wordSegment;    // the code segment
-    Vector<Value>                               constDataSegment;   // strings, names, ...
+    Vector<Process::Value>                      constDataSegment;   // strings, names, ...
 
-
-    Signal                                      sig;
 
     // debugging facilites
     bool                                        verboseDebugging;
@@ -232,6 +226,19 @@ struct StringStream : public IInputStream {
 };
 
 struct Terminal : public VM::Process {
+    enum ErrorCase {
+        WORD_NOT_FOUND          = -1,
+        VS_UNDERFLOW            = -2,
+        VS_OVERFLOW             = -3,
+        RS_UNDERFLOW            = -4,
+        RS_OVERFLOW             = -5,
+        WORD_NOT_DEFINED        = -6,
+        INT_IS_NO_WORD          = -7,
+        WORD_ID_OUT_OF_RANGE    = -8,
+        LOCAL_IS_NOT_INT        = -9,
+        LOCAL_OVERFLOW          = -10,
+    };
+
     static void     wordId          (VM::Process* proc);
     static void     defineWord      (VM::Process* proc);
     static void     immediate       (VM::Process* proc);
@@ -254,9 +261,6 @@ private:
 
     static bool     isInt(const String& tok);
     static int32_t  toInt32(const String& tok);
-
-
-
 };
 
 struct Primitives {
@@ -298,20 +302,17 @@ struct Primitives {
     static void     rsPtr           (VM::Process* proc);
     static void     wsPtr           (VM::Process* proc);
     static void     cdsPtr          (VM::Process* proc);
-    static void     esPtr           (VM::Process* proc);
 
     static void     vsFetch         (VM::Process* proc);
     static void     rsFetch         (VM::Process* proc);
     static void     lsFetch         (VM::Process* proc);
     static void     wsFetch         (VM::Process* proc);
     static void     cdsFetch        (VM::Process* proc);
-    static void     esFetch         (VM::Process* proc);
 
     static void     vsStore         (VM::Process* proc);
     static void     lsStore         (VM::Process* proc);
     static void     wsStore         (VM::Process* proc);
     static void     cdsStore        (VM::Process* proc);
-    static void     esStore         (VM::Process* proc);
 
     static void     bye             (VM::Process* proc);
     static void     exit            (VM::Process* proc);

@@ -22,13 +22,13 @@ namespace Forth {
 
 #define VS_POP(V)   \
     if( proc->valueStack_.size() == 0 ) { /* proc->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow");*/ return; } \
-    VM::Value   V = proc->topValue(); \
+    VM::Process::Value   V = proc->topValue(); \
     proc->popValue()
 
 void
 Primitives::fetchInt32(VM::Process* proc) {
     int32_t    u   = proc->fetch();
-    VM::Value   v(u);
+    VM::Process::Value   v(u);
     proc->pushValue(v);
 }
 
@@ -61,35 +61,35 @@ void
 Primitives::addInt32(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 + b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 + b.i32));
 }
 
 void
 Primitives::subInt32(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 - b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 - b.i32));
 }
 
 void
 Primitives::mulInt32(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 * b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 * b.i32));
 }
 
 void
 Primitives::divInt32(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 / b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 / b.i32));
 }
 
 void
 Primitives::modInt32(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 % b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 % b.i32));
 }
 
 void
@@ -110,7 +110,7 @@ Primitives::branchIf(VM::Process* proc) {
 
 void
 Primitives::dup(VM::Process* proc) {
-    VM::Value val   = proc->topValue();
+    VM::Process::Value val   = proc->topValue();
     proc->pushValue(val);
 }
 
@@ -130,7 +130,7 @@ Primitives::swap(VM::Process* proc) {
 
 void
 Primitives::codeSize(VM::Process* proc) {
-    VM::Value v(static_cast<int32_t>(proc->vm_->wordSegment.size()));
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment.size()));
     proc->pushValue(v);
 }
 
@@ -150,106 +150,106 @@ Primitives::emitConstData(VM::Process* proc) {
 void
 Primitives::emitException(VM::Process* proc) {
     VS_POP(v);
-    proc->exceptionStack.push_back(VM::Error(static_cast<VM::ErrorCase>(v.i32), ""));
+    proc->emitSignal(VM::Process::Signal(VM::Process::Signal::EXCEPTION, proc->pid_, v.i32));
 }
 
 void
 Primitives::ieq(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value((a.i32 == b.i32) ? -1 : 0));
+    proc->pushValue(VM::Process::Value((a.i32 == b.i32) ? -1 : 0));
 }
 
 void
 Primitives::ineq(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value((a.i32 != b.i32) ? -1 : 0));
+    proc->pushValue(VM::Process::Value((a.i32 != b.i32) ? -1 : 0));
 }
 
 void
 Primitives::igt(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 > b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 > b.i32));
 }
 
 void
 Primitives::ilt(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 < b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 < b.i32));
 }
 
 void
 Primitives::igeq(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 >= b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 >= b.i32));
 }
 
 void
 Primitives::ileq(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.i32 <= b.i32));
+    proc->pushValue(VM::Process::Value(a.i32 <= b.i32));
 }
 
 void
 Primitives::notBW(VM::Process* proc) {
     VS_POP(v);
-    proc->pushValue(VM::Value(!v.u32));
+    proc->pushValue(VM::Process::Value(!v.u32));
 }
 
 void
 Primitives::andBW(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.u32 & b.u32));
+    proc->pushValue(VM::Process::Value(a.u32 & b.u32));
 }
 
 void
 Primitives::orBW(VM::Process* proc) {
     VS_POP(b);
     VS_POP(a);
-    proc->pushValue(VM::Value(a.u32 | b.u32));
+    proc->pushValue(VM::Process::Value(a.u32 | b.u32));
 }
 
 void
 Primitives::vsPtr(VM::Process* proc) {
-    VM::Value v(static_cast<int32_t>(proc->valueStack_.size()) - 1);
+    VM::Process::Value v(static_cast<int32_t>(proc->valueStack_.size()) - 1);
     proc->pushValue(v);
 }
 
 void
 Primitives::rsPtr(VM::Process* proc) {
-    VM::Value v(static_cast<int32_t>(proc->returnStack_.size()) - 1);
+    VM::Process::Value v(static_cast<int32_t>(proc->returnStack_.size()) - 1);
     proc->pushValue(v);
 }
 
 void
 Primitives::wsPtr(VM::Process* proc) {
-    VM::Value v(static_cast<int32_t>(proc->vm_->wordSegment.size()) - 1);
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment.size()) - 1);
     proc->pushValue(v);
 }
 
 void
 Primitives::cdsPtr(VM::Process* proc) {
-    VM::Value v(static_cast<int32_t>(proc->vm_->constDataSegment.size()) - 1);
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->constDataSegment.size()) - 1);
     proc->pushValue(v);
 }
 
 void
 Primitives::vsFetch(VM::Process* proc) {
     VS_POP(addr);
-    VM::Value v = proc->valueStack_[addr.i32];
+    VM::Process::Value v = proc->valueStack_[addr.i32];
     proc->pushValue(v);
 }
 
 void
 Primitives::rsFetch(VM::Process* proc) {
     VS_POP(addr);
-    VM::Value v(static_cast<int32_t>(proc->returnStack_[addr.i32].ip));
+    VM::Process::Value v(static_cast<int32_t>(proc->returnStack_[addr.i32].ip));
     proc->pushValue(v);
 }
 
@@ -259,7 +259,7 @@ Primitives::lsFetch(VM::Process* proc) {
 
     uint32_t lp     = proc->lp_ + addr.u32;
 
-    VM::Value v = proc->localStack_[lp];
+    VM::Process::Value v = proc->localStack_[lp];
     proc->pushValue(v);
 }
 
@@ -267,22 +267,15 @@ void
 Primitives::wsFetch(VM::Process* proc) {
     VS_POP(addr);
 
-    VM::Value v(static_cast<int32_t>(proc->vm_->wordSegment[addr.i32]));
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment[addr.i32]));
     proc->pushValue(v);
 }
 
 void
 Primitives::cdsFetch(VM::Process* proc) {
     VS_POP(addr);
-    VM::Value v = proc->vm_->constDataSegment[addr.i32];
+    VM::Process::Value v = proc->vm_->constDataSegment[addr.i32];
     proc->pushValue(v);
-}
-
-void
-Primitives::esFetch(VM::Process* proc) {
-    VS_POP(addr);
-    VM::ErrorCase v = vm->exceptionStack[addr.i32].errorCase;
-    vm->push(VM::Value(static_cast<int32_t>(v)));
 }
 
 void
@@ -320,16 +313,8 @@ Primitives::cdsStore(VM::Process* proc) {
 }
 
 void
-Primitives::esStore(VM::Process* proc) {
-    VS_POP(addr);
-    VS_POP(v);
-
-    vm->exceptionStack[addr.i32] = VM::Error(static_cast<VM::ErrorCase>(v.i32), "");
-}
-
-void
 Primitives::bye(VM::Process* proc) {
-    proc->sig_ = VM::Signal::ABORT;
+    proc->sig_ = VM::Process::Signal(VM::Process::Signal::EXIT, proc->pid_, 0);
 }
 
 void
@@ -348,7 +333,7 @@ Primitives::showValueStack(VM::Process* proc) {
 void
 Primitives::setDebugMode(VM::Process* proc) {
     VS_POP(v);
-    vm->verboseDebugging    = v.u32 ? true : false;
+    proc->vm_->verboseDebugging    = v.u32 ? true : false;
 }
 
 }   // namespace forth
