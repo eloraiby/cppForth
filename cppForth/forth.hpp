@@ -81,7 +81,7 @@ struct VM : public RCObject {
 
         inline bool             isNative() const { return color == NATIVE; }
 
-        Function() : color(NATIVE) {
+        Function() : color(NATIVE), isImmediate(false) {
             body.native = nullptr;
             body.interpreted.localCount = 0;
         }

@@ -145,7 +145,7 @@ Terminal::defineWord(VM::Process* proc) {
     String name    = term->getToken();
 
     if( Terminal::isInt(name) ) {
-        term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::WORD_NOT_FOUND));
+        term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::INT_IS_NO_WORD));
     } else {
         //
         // TODO:    do we want to allow forward declaration ?
@@ -163,6 +163,9 @@ Terminal::defineWord(VM::Process* proc) {
 
         term->vm_->nameToWord[name]    = wordId;
         
+        if( term->vm_->verboseDebugging ) {
+            fprintf(stderr, "%s [%d]\n", name.c_str(), wordId);
+        }
         term->stream()->setMode(IInputStream::Mode::COMPILE);
     }
 }
