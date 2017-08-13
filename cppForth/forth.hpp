@@ -97,6 +97,7 @@ struct VM : public RCObject {
                 EXCEPTION               = -2,   // exception
                 WORD_ID_OUT_OF_RANGE    = -3,   // code segment fault
                 WORD_NOT_IMPLEMENTED    = -4,   // the function is not implemented (TODO: should this be on the parser end only ?)
+                VS_UNDERFLOW            = -5,   // value stack underflow
 
             };
 

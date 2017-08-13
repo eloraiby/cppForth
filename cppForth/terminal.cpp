@@ -157,7 +157,7 @@ Terminal::defineWord(VM::Process* proc) {
         VM::Function    func;
 
         func.name   = name;
-
+        func.color  = VM::Function::Color::NORMAL;
         func.body.interpreted.start  = term->vm_->wordSegment.size();
         term->vm_->functions.push_back(func);
 
@@ -242,8 +242,33 @@ Terminal::see(VM::Process* proc) {
     fprintf(stdout, "\n");
 }
 
+
+
 Terminal::Terminal(VM* vm) : VM::Process(nullptr, 0) {
+    struct Primitive {
+        const char*     name;
+        VM::NativeFunction  native;
+        bool            isImmediate;
+    };
+
+    static Primitive primitives[] = {
+            { ":"           , Terminal::defineWord      , false },
+            { "immediate"   , Terminal::immediate       , true  },
+            { "locals"      , Terminal::setLocalCount   , true  },
+            { ";"           , Terminal::endWord         , true  },
+            { "'"           , Terminal::wordId          , true  },
+
+            { "stream.peek" , Terminal::streamPeek      , false },
+            { "stream.getch", Terminal::streamGetCH     , false },
+
+            { "see"         , Terminal::see             , false },
+    };
+
     vm_ = vm;
+
+    for(Primitive p : primitives) {
+        vm_->addNativeFunction(p.name, p.native, p.isImmediate);
+    }
 }
 
 }   // namespace Forth

@@ -121,7 +121,7 @@ VM::Process::runCall(uint32_t word) {
 
 VM::Process::Process(VM::Process* parent, uint32_t pid) :  sig_(Signal(VM::Process::Signal::NONE, 0, 0)), pid_(pid), wp_(0), lp_(0), parent_(parent) {}
 
-VM::VM() : verboseDebugging(false) {
+VM::VM() : verboseDebugging(true) {
     initPrimitives();
 }
 
@@ -156,8 +156,6 @@ VM::initPrimitives() {
         { "w>"          , Primitives::emitWord      , false },
         { "cd>"         , Primitives::emitConstData , false },
         { "e>"          , Primitives::emitException , false },
-
-
         
         { "=="          , Primitives::ieq           , false },
         { "=/="         , Primitives::ineq          , false },

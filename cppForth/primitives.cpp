@@ -21,7 +21,7 @@
 namespace Forth {
 
 #define VS_POP(V)   \
-    if( proc->valueStack_.size() == 0 ) { /* proc->throwException(VM::ErrorCase::VS_UNDERFLOW, "value stack underflow");*/ return; } \
+    if( proc->valueStack_.size() == 0 ) { proc->emitSignal(VM::Process::Signal(VM::Process::Signal::VS_UNDERFLOW, proc->pid_, 0)); return; } \
     VM::Process::Value   V = proc->topValue(); \
     proc->popValue()
 
