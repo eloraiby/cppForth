@@ -119,7 +119,7 @@ VM::Process::runCall(uint32_t word) {
 }
 
 
-VM::Process::Process(uint32_t pid) :  sig_(Signal(VM::Process::Signal::NONE, 0, 0)), pid_(pid), wp_(0), lp_(0) {}
+VM::Process::Process(VM::Process* parent, uint32_t pid) :  sig_(Signal(VM::Process::Signal::NONE, 0, 0)), pid_(pid), wp_(0), lp_(0), parent_(parent) {}
 
 VM::VM() : verboseDebugging(false) {
     initPrimitives();

@@ -242,4 +242,8 @@ Terminal::see(VM::Process* proc) {
     fprintf(stdout, "\n");
 }
 
+Terminal::Terminal(VM* vm) : VM::Process(nullptr, 0) {
+    vm_ = vm;
+}
+
 }   // namespace Forth

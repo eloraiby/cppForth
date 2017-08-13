@@ -138,7 +138,7 @@ struct VM : public RCObject {
         void            runCall(uint32_t word);
         void            emitSignal(const Signal& sig);
     
-        Process(uint32_t pid);
+        Process(Process* parent, uint32_t pid);
 
     protected:
         inline void
@@ -244,6 +244,8 @@ struct StringStream : public IInputStream {
 };
 
 struct Terminal : public VM::Process {
+    typedef IntrusivePtr<Terminal>  Ptr;
+
     enum ErrorCase {
         WORD_NOT_FOUND          = -1,
         VS_UNDERFLOW            = -2,
@@ -267,9 +269,12 @@ struct Terminal : public VM::Process {
     static void     streamGetCH     (VM::Process* proc);
     static void     streamToken     (VM::Process* proc);
 
+    void            loadStream(IInputStream::Ptr stream);
+
+    Terminal(VM* vm);
+
 private:
     String          getToken();
-    void            loadStream(IInputStream::Ptr stream);
 
     inline IInputStream::Ptr    stream() const  { return streams_.back(); }
     inline void     pushStream(IInputStream::Ptr strm)  { streams_.push_back(strm); }
