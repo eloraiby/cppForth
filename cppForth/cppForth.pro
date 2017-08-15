@@ -13,7 +13,8 @@ SOURCES += main.cpp \
     primitives.cpp \
     base.cpp \
     streams.cpp \
-    mingw_fix.c
+    mingw_fix.c \
+    terminal.cpp
 
 HEADERS += \
     forth.hpp \
