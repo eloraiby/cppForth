@@ -141,6 +141,8 @@ struct VM : public RCObject {
     
         Process(Process* parent, uint32_t pid);
 
+        uint32_t        pid() const             { return pid_; }
+
     protected:
         inline void
         setCall(uint32_t word) {
@@ -340,6 +342,8 @@ struct Primitives {
 
     static void     bye             (VM::Process* proc);
     static void     exit            (VM::Process* proc);
+
+    static void     pid             (VM::Process* proc);
 
     // debug helpers
     static void     showValueStack  (VM::Process* proc);
