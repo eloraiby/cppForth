@@ -167,6 +167,7 @@
     <ClCompile Include="primitives.cpp" />
     <ClCompile Include="streams.cpp" />
     <ClCompile Include="terminal.cpp" />
+    <ClCompile Include="vm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="base.hpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="intrusive-ptr.hpp" />
     <ClInclude Include="string.hpp" />
     <ClInclude Include="vector.hpp" />
+    <ClInclude Include="vm.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bootstrap.f">

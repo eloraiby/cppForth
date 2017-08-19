@@ -1,7 +1,7 @@
 #ifndef STRING_HPP
 #define STRING_HPP
 
-#ifndef __FORTH_BASE__
+#ifndef __SM_BASE__
 #   include "base.hpp"
 #endif
 
@@ -12,7 +12,7 @@ FORTH_API uint32_t __forth_hash_string__(const char* str);
 FORTH_API uint32_t __forth_reverse_hash_string__(const char* str);
 }
 
-namespace Forth
+namespace SM
 {
 ///
 /// RTK string implementation
@@ -210,6 +210,6 @@ struct Hash<String> {
     static uint32_t hash(const String& str) { return hash_string(str); }
 };
 
-}	// namespace Forth
+}	// namespace SM
 #endif // STRING_HPP
 

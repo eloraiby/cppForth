@@ -20,7 +20,7 @@
 
 namespace Forth {
 bool
-Terminal::isInt(const String& tok) {
+Terminal::isInt(const SM::String& tok) {
     uint32_t    pos = 0;
     
     while( pos < tok.size() ) {
@@ -35,7 +35,7 @@ Terminal::isInt(const String& tok) {
 }
 
 int32_t
-Terminal::toInt32(const String& tok) {
+Terminal::toInt32(const SM::String& tok) {
     uint32_t    pos = 0;
     uint32_t    val = 0;
     
@@ -47,9 +47,9 @@ Terminal::toInt32(const String& tok) {
     return val;
 }
 
-String
+SM::String
 Terminal::getToken() {
-    String ret;
+    SM::String ret;
     
     // remove white space
     while( stream()->peekChar() && IInputStream::isSpace(stream()->peekChar()) ) { stream()->getChar(); }
@@ -70,7 +70,7 @@ Terminal::loadStream(IInputStream::Ptr strm) {
     streams_.push_back(strm);
 
     while( stream()->peekChar() && sig_.ty == Signal::NONE ) {
-        String tok = getToken();
+        SM::String tok = getToken();
 
         switch( stream()->getMode() ) {
         case IInputStream::Mode::EVAL:
@@ -78,12 +78,12 @@ Terminal::loadStream(IInputStream::Ptr strm) {
                 Value v(toInt32(tok));
                 valueStack_.push_back(v);
             } else {
-                if( vm_->nameToWord.find(tok) == vm_->nameToWord.end() ) {
+                if( vm_->nameToWord().find(tok) == vm_->nameToWord().end() ) {
                     char buff[MAX_BUFF] = {0};
                     sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
                     emitSignal(Signal(Signal::EXCEPTION, pid_, ErrorCase::WORD_NOT_FOUND));
                 } else {
-                    runCall(vm_->nameToWord[tok]);
+                    runCall(vm_->nameToWord()[tok]);
                 }
             }
             break;
@@ -93,13 +93,13 @@ Terminal::loadStream(IInputStream::Ptr strm) {
                 vm_->emit(0);
                 vm_->emit(Value(toInt32(tok)).u32);
             } else {
-                if( vm_->nameToWord.find(tok) == vm_->nameToWord.end() ) {
+                if( vm_->nameToWord().find(tok) == vm_->nameToWord().end() ) {
                     char buff[MAX_BUFF] = {0};
                     sprintf(buff, "ERROR: word not found (%s)", tok.c_str());
                     emitSignal(Signal(Signal::EXCEPTION, pid_, ErrorCase::WORD_NOT_FOUND));
                 } else {
-                    uint32_t    word    = vm_->nameToWord[tok];
-                    if( vm_->functions[word].isImmediate ) {
+                    uint32_t    word    = vm_->nameToWord()[tok];
+                    if( vm_->functions()[word].isImmediate ) {
                         runCall(word);
                     } else {
                         vm_->emit(word);
@@ -117,32 +117,32 @@ Terminal::loadStream(IInputStream::Ptr strm) {
 // vm primitives
 ////////////////////////////////////////////////////////////////////////////////
 void
-Terminal::wordId(VM::Process* proc) {
+Terminal::wordId(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
-    String name    = term->getToken();
+    SM::String name    = term->getToken();
     
     if( Terminal::isInt(name) ) {
         term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::INT_IS_NO_WORD));
         return;
     }
 
-    if( term->vm_->nameToWord.find(name) == term->vm_->nameToWord.end() ) {
+    if( term->vm_->nameToWord().find(name) == term->vm_->nameToWord().end() ) {
         char buff[MAX_BUFF] = {0};
         sprintf(buff, "ERROR: word not found (%s)", name.c_str());
         term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::WORD_NOT_FOUND));
         return;
     }
     
-    uint32_t    wordId = term->vm_->nameToWord[name];
+    uint32_t    wordId = term->vm_->nameToWord()[name];
     term->vm_->emit(0);
     term->vm_->emit(wordId);
 }
 
 void
-Terminal::defineWord(VM::Process* proc) {
+Terminal::defineWord(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
 
-    String name    = term->getToken();
+    SM::String name    = term->getToken();
 
     if( Terminal::isInt(name) ) {
         term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::INT_IS_NO_WORD));
@@ -152,18 +152,9 @@ Terminal::defineWord(VM::Process* proc) {
         //          In this case, we should test to see if the functions[nameToWord[name]].start == -1 && .native == nullptr
         //          before setting the the old function to a value
         //
-        uint32_t    wordId  = static_cast<uint32_t>(term->vm_->functions.size());
-
-        VM::Function    func;
-
-        func.name   = name;
-        func.color  = VM::Function::Color::NORMAL;
-        func.body.interpreted.start  = term->vm_->wordSegment.size();
-        term->vm_->functions.push_back(func);
-
-        term->vm_->nameToWord[name]    = wordId;
+        uint32_t    wordId  = term->vm_->addNormalFunction(name);
         
-        if( term->vm_->verboseDebugging ) {
+        if( term->vm_->isVerboseDebugging() ) {
             fprintf(stderr, "%s [%d]\n", name.c_str(), wordId);
         }
         term->stream()->setMode(IInputStream::Mode::COMPILE);
@@ -171,33 +162,33 @@ Terminal::defineWord(VM::Process* proc) {
 }
 
 void
-Terminal::immediate(VM::Process* proc) {
+Terminal::immediate(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
-    term->vm_->functions[term->vm_->functions.size() - 1].isImmediate = true;
+    term->vm_->setFunctionAsImmediate(term->vm_->functions().size() - 1);
 }
 
 void
-Terminal::setLocalCount(VM::Process* proc) {
+Terminal::setLocalCount(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
-    String tok  = term->getToken();
+    SM::String tok  = term->getToken();
 
     if( !Terminal::isInt(tok) ) {
         term->emitSignal(Signal(Signal::EXCEPTION, term->pid_, ErrorCase::LOCAL_IS_NOT_INT));
         return;
     }
-
-    term->vm_->functions[term->vm_->functions.size() - 1].body.interpreted.localCount = Terminal::toInt32(tok);
+    uint32_t i = Terminal::toInt32(tok);
+    term->vm_->setFunctionLocalCount(term->vm_->functions().size() - 1, i);
 }
 
 void
-Terminal::endWord(VM::Process* proc) {
+Terminal::endWord(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     term->stream()->setMode(IInputStream::Mode::EVAL);
     term->vm_->emit(1);
 }
 
 void
-Terminal::streamPeek(VM::Process* proc) {
+Terminal::streamPeek(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     // TODO: handle stream error (if it does not exist)
     Value v(static_cast<uint32_t>(term->stream()->peekChar()));
@@ -205,7 +196,7 @@ Terminal::streamPeek(VM::Process* proc) {
 }
 
 void
-Terminal::streamGetCH(VM::Process* proc) {
+Terminal::streamGetCH(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     // TODO: handle stream error (does not exist)
     Value v(static_cast<uint32_t>(term->stream()->getChar()));
@@ -213,32 +204,32 @@ Terminal::streamGetCH(VM::Process* proc) {
 }
 
 void
-Terminal::streamToken(VM::Process* proc) {
+Terminal::streamToken(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
     // TODO: when strings are ready
 }
 
 void
-Terminal::see(VM::Process* proc) {
+Terminal::see(SM::VM::Process* proc) {
     Terminal* term = static_cast<Terminal*>(proc);
-    uint32_t    word    = term->vm_->nameToWord[term->getToken()];
-    fprintf(stdout, "[%d] : %s ", word, term->vm_->functions[word].name.c_str());
-    if( term->vm_->functions[word].color == VM::Function::Color::NATIVE ) {
+    uint32_t    word    = term->vm_->nameToWord()[term->getToken()];
+    fprintf(stdout, "[%d] : %s ", word, term->vm_->functions()[word].name.c_str());
+    if( term->vm_->functions()[word].color == SM::VM::Function::Color::NATIVE ) {
          fprintf(stdout, " <native> ");
     } else {
-        int32_t     curr    = term->vm_->functions[word].body.interpreted.start;
-        while( term->vm_->wordSegment[curr] != 1 ) {
-            if( term->vm_->wordSegment[curr] == 0 ) {
-                fprintf(stdout, "%d ", term->vm_->wordSegment[++curr]);
+        int32_t     curr    = term->vm_->functions()[word].body.interpreted.start;
+        while( term->vm_->wordSegment()[curr] != 1 ) {
+            if( term->vm_->wordSegment()[curr] == 0 ) {
+                fprintf(stdout, "%d ", term->vm_->wordSegment()[++curr]);
             } else {
-                fprintf(stdout, "@%d:%s ", curr, term->vm_->functions[term->vm_->wordSegment[curr]].name.c_str());
+                fprintf(stdout, "@%d:%s ", curr, term->vm_->functions()[term->vm_->wordSegment()[curr]].name.c_str());
             }
 
             ++curr;
         }
     }
 
-    if( term->vm_->functions[word].isImmediate ) {
+    if( term->vm_->functions()[word].isImmediate ) {
         fprintf(stdout, "immediate");
     }
 
@@ -247,11 +238,11 @@ Terminal::see(VM::Process* proc) {
 
 
 
-Terminal::Terminal(VM* vm) : VM::Process(nullptr, 0) {
+Terminal::Terminal(SM::VM* vm) : SM::VM::Process(nullptr, 0) {
     struct Primitive {
-        const char*     name;
-        VM::NativeFunction  native;
-        bool            isImmediate;
+        const char*             name;
+        SM::VM::NativeFunction  native;
+        bool                    isImmediate;
     };
 
     static Primitive primitives[] = {

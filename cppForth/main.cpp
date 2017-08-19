@@ -17,7 +17,7 @@
 #include "forth.hpp"
 #include <stdio.h>
 
-Forth::String
+SM::String
 readFile(const char* filename) {
     FILE* f = fopen(filename, "rb");
     if( f == nullptr ) {
@@ -34,7 +34,7 @@ readFile(const char* filename) {
 
     fclose(f);
 
-    Forth::String ret(buff);
+    SM::String ret(buff);
     delete[] buff;
 
     return ret;
@@ -42,9 +42,9 @@ readFile(const char* filename) {
 
 int
 main(int argc, char* argv[]) {
-    Forth::VM*  vm  = new Forth::VM();
+    SM::VM*  vm  = new SM::VM();
 
-    Forth::String core    = readFile("bootstrap.f");
+    SM::String core    = readFile("bootstrap.f");
     Forth::IInputStream::Ptr coreStream(new Forth::StringStream(core.c_str()));
     Forth::Terminal::Ptr    term(new Forth::Terminal(vm));
     term->loadStream(coreStream);

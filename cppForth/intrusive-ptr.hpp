@@ -1,8 +1,11 @@
 #ifndef INTRUSIVE_PTR__HPP
 #define INTRUSIVE_PTR__HPP
 
-#include "base.hpp"
-namespace Forth {
+#ifndef __SM_BASE__
+#   include "base.hpp"
+#endif
+
+namespace SM {
 //
 //  Copyright (c) 2001, 2002 Peter Dimov
 //
@@ -224,5 +227,5 @@ private:
     mutable uint32_t        count_;
 };
 
-} // namespace Forth
+} // namespace SM
 #endif  // INTRUSIVE_PTR__HPP

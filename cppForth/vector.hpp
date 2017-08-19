@@ -6,7 +6,7 @@
 #include <malloc.h>
 #include <cstdint>
 
-namespace Forth
+namespace SM
 {
 
 template<typename T>
@@ -173,5 +173,5 @@ public:
 	}
 
 };	// struct vector
-}	// Forth
+}	// namespace SM
 #endif // VECTOR_HPP

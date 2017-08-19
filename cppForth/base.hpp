@@ -1,5 +1,5 @@
-#ifndef __FORTH_BASE__
-#define __FORTH_BASE__
+#ifndef __SM_BASE__
+#define __SM_BASE__
 
 #define _HAS_EXCEPTIONS 0   // MSVC (disable exception)
 
@@ -67,7 +67,7 @@ void     __cdecl operator delete[](void* p, size_t) NOEXCEPT;
 #else
 void     operator delete[](void* p, size_t) NOEXCEPT;
 #endif
-namespace Forth {
+namespace SM {
 
 template<typename T>
 struct Hash {
@@ -100,4 +100,4 @@ private:  // emphasize the following members are private
 
 }
 
-#endif  // __FORTH_BASE__
+#endif  // __SM_BASE__

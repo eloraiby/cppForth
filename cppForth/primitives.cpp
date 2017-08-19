@@ -18,7 +18,7 @@
 #include <cstdio>
 #include <cstdlib>
 
-namespace Forth {
+namespace SM {
 
 #define VS_POP(V)   \
     if( proc->valueStack_.size() == 0 ) { proc->emitSignal(VM::Process::Signal(VM::Process::Signal::VS_UNDERFLOW, proc->pid_, 0)); return; } \
@@ -130,7 +130,7 @@ Primitives::swap(VM::Process* proc) {
 
 void
 Primitives::codeSize(VM::Process* proc) {
-    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment.size()));
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment_.size()));
     proc->pushValue(v);
 }
 
@@ -229,7 +229,7 @@ Primitives::rsPtr(VM::Process* proc) {
 
 void
 Primitives::wsPtr(VM::Process* proc) {
-    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment.size()) - 1);
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment_.size()) - 1);
     proc->pushValue(v);
 }
 
@@ -267,7 +267,7 @@ void
 Primitives::wsFetch(VM::Process* proc) {
     VS_POP(addr);
 
-    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment[addr.i32]));
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->wordSegment_[addr.i32]));
     proc->pushValue(v);
 }
 
@@ -301,7 +301,7 @@ Primitives::wsStore(VM::Process* proc) {
     VS_POP(addr);
     VS_POP(v);
 
-    proc->vm_->wordSegment[addr.i32] = v.u32;
+    proc->vm_->wordSegment_[addr.i32] = v.u32;
 }
 
 void

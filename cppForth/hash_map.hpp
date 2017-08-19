@@ -16,9 +16,11 @@
 #ifndef __HASH_MAP__HPP__
 #define __HASH_MAP__HPP__
 
-#include "base.hpp"
+#ifndef __SM_BASE__
+#   include "base.hpp"
+#endif
 
-namespace Forth {
+namespace SM {
 
 template<typename K, typename V>
 struct HashMap : public NonCopyable {
@@ -160,9 +162,9 @@ HashMap<K, V>::findElement(const K& key) const {
 template<typename K, typename V>
 const V*
 HashMap<K, V>::getValue(const K& key) const {
-    EPtr elemPos = findRlement(key);
+    EPtr elemPos = findElement(key);
     if( elemPos != EPtr::endPtr() ) {
-        return &elements[elemPos.detPtr()].value;
+        return &elements[elemPos.getPtr()].value;
     } else {
         return nullptr;
     }
@@ -286,5 +288,5 @@ HashMap<K, V>::remove(const K& key) {
     }
 }
 
-}   // namespace Forth
+}   // namespace SM
 #endif
