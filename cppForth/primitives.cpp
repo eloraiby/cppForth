@@ -144,7 +144,7 @@ Primitives::emitWord(VM::Process* proc) {
 void
 Primitives::emitConstData(VM::Process* proc) {
     VS_POP(v);
-    proc->vm_->constDataSegment.push_back(v);
+    proc->vm_->constDataSegment_.push_back(v);
 }
 
 void
@@ -235,7 +235,7 @@ Primitives::wsPtr(VM::Process* proc) {
 
 void
 Primitives::cdsPtr(VM::Process* proc) {
-    VM::Process::Value v(static_cast<int32_t>(proc->vm_->constDataSegment.size()) - 1);
+    VM::Process::Value v(static_cast<int32_t>(proc->vm_->constDataSegment_.size()) - 1);
     proc->pushValue(v);
 }
 
@@ -274,7 +274,7 @@ Primitives::wsFetch(VM::Process* proc) {
 void
 Primitives::cdsFetch(VM::Process* proc) {
     VS_POP(addr);
-    VM::Process::Value v = proc->vm_->constDataSegment[addr.i32];
+    VM::Process::Value v = proc->vm_->constDataSegment_[addr.i32];
     proc->pushValue(v);
 }
 
@@ -309,7 +309,7 @@ Primitives::cdsStore(VM::Process* proc) {
     VS_POP(addr);
     VS_POP(v);
 
-    proc->vm_->constDataSegment[addr.i32] = v;
+    proc->vm_->constDataSegment_[addr.i32] = v;
 }
 
 void
@@ -333,7 +333,7 @@ Primitives::showValueStack(VM::Process* proc) {
 void
 Primitives::setDebugMode(VM::Process* proc) {
     VS_POP(v);
-    proc->vm_->verboseDebugging    = v.u32 ? true : false;
+    proc->vm_->verboseDebugging_   = v.u32 ? true : false;
 }
 
 }   // namespace forth

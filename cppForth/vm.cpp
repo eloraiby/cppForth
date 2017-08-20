@@ -70,7 +70,7 @@ VM::Process::step() {
         return;
     }
 
-    if( vm_->verboseDebugging ) {
+    if( vm_->verboseDebugging_ ) {
         fprintf(stdout, "    @%d -- %s", wp_, vm_->functions_[word].name.c_str());
         if( word == 0 ) {
             fprintf(stdout, " %d", vm_->wordSegment_[wp_ + 1]);
@@ -86,7 +86,7 @@ VM::Process::step() {
             emitSignal(VM::Process::Signal(VM::Process::Signal::WORD_NOT_IMPLEMENTED, pid_, 0));
             return;
         } else {
-            if( vm_->verboseDebugging ) {
+            if( vm_->verboseDebugging_ ) {
                 fprintf(stdout, "%s:\n", vm_->functions_[word].name.c_str());
             }
             setCall(word);
@@ -112,7 +112,7 @@ VM::Process::runCall(uint32_t word) {
     }
 
     // IF verbose debugging AND IF function id exists
-    if( vm_->verboseDebugging ) {
+    if( vm_->verboseDebugging_ ) {
         fprintf(stdout, "%s:\n", vm_->functions_[word].name.c_str());
     }
 
@@ -132,7 +132,7 @@ VM::Process::runCall(uint32_t word) {
 
 VM::Process::Process(VM::Process* parent, uint32_t pid) :  sig_(Signal(VM::Process::Signal::NONE, 0, 0)), pid_(pid), wp_(0), lp_(0), parent_(parent) {}
 
-VM::VM() : verboseDebugging(false) {
+VM::VM() : verboseDebugging_(false) {
     initPrimitives();
 }
 

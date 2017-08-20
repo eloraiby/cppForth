@@ -176,7 +176,7 @@ struct VM : public RCObject {
 
     const Vector<uint32_t>& wordSegment() const { return wordSegment_; }
     inline uint32_t wordSegmentSize() const     { return wordSegment_.size(); }
-    inline bool     isVerboseDebugging() const  { return verboseDebugging; }
+    inline bool     isVerboseDebugging() const  { return verboseDebugging_; }
 
 private:
 
@@ -186,11 +186,11 @@ private:
     HashMap<String, uint32_t>                   nameToWord_;
 
     Vector<uint32_t>                            wordSegment_;    // the code segment
-    Vector<Process::Value>                      constDataSegment;   // strings, names, ...
+    Vector<Process::Value>                      constDataSegment_;   // strings, names, ...
 
 
     // debugging facilites
-    bool                                        verboseDebugging;
+    bool                                        verboseDebugging_;
 
 
     friend struct   Primitives;
