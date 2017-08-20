@@ -197,16 +197,6 @@ VM::initPrimitives() {
 
         { ".s"          , Primitives::showValueStack, false },
         { "deb.set"     , Primitives::setDebugMode  , false },
-/*
-        { "'"           , Terminal::wordId          , true  },
-        { ":"           , Terminal::defineWord      , false },
-        { ";"           , Terminal::endWord         , true  },
-        { "immediate"   , Terminal::immediate       , true  },
-        { "locals"      , Terminal::setLocalCount   , true  },
-        { "stream.peek" , Terminal::streamPeek      , false },
-        { "stream.getch", Terminal::streamGetCH     , false },
-        { "see"         , Terminal::see             , false },
-*/
     };
 
     for(Primitive p : primitives) {
