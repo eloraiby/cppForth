@@ -9,12 +9,12 @@ QMAKE_LFLAGS += -Wl,--gc-sections #-static -static-libgcc
 QMAKE_LINK  = gcc
 
 SOURCES += main.cpp \
-    forth.cpp \
     primitives.cpp \
     base.cpp \
     streams.cpp \
     mingw_fix.c \
-    terminal.cpp
+    terminal.cpp \
+    vm.cpp
 
 HEADERS += \
     forth.hpp \
@@ -22,7 +22,8 @@ HEADERS += \
     base.hpp \
     string.hpp \
     vector.hpp \
-    intrusive-ptr.hpp
+    intrusive-ptr.hpp \
+    vm.hpp
 
 DISTFILES += \
     bootstrap.f
