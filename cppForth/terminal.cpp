@@ -19,6 +19,8 @@
 #include <cstdlib>
 
 namespace Forth {
+IInputStream::~IInputStream() {}
+
 bool
 Terminal::isInt(const SM::String& tok) {
     uint32_t    pos = 0;

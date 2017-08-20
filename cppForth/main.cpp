@@ -17,11 +17,11 @@
 #include "forth.hpp"
 #include <stdio.h>
 
-SM::String
+SM::String*
 readFile(const char* filename) {
     FILE* f = fopen(filename, "rb");
     if( f == nullptr ) {
-        return "";
+        return nullptr;
     }
 
     fseek(f, 0, SEEK_END);
@@ -34,7 +34,7 @@ readFile(const char* filename) {
 
     fclose(f);
 
-    SM::String ret(buff);
+    SM::String* ret = new SM::String(buff);
     delete[] buff;
 
     return ret;
@@ -44,13 +44,18 @@ int
 main(int argc, char* argv[]) {
     SM::VM*  vm  = new SM::VM();
 
-    SM::String core    = readFile("bootstrap.f");
-    Forth::IInputStream::Ptr coreStream(new Forth::StringStream(core.c_str()));
-    Forth::Terminal::Ptr    term(new Forth::Terminal(vm));
-    term->loadStream(coreStream);
+    SM::String* core    = readFile("bootstrap.f");
+    if(core != nullptr) {
+        Forth::IInputStream::Ptr coreStream(new Forth::StringStream(core->c_str()));
+        Forth::Terminal::Ptr    term(new Forth::Terminal(vm));
+        term->loadStream(coreStream);
+        delete core;
 
-    Forth::IInputStream::Ptr strm(new Forth::StdInStream());
-    term->loadStream(strm);
+        Forth::IInputStream::Ptr strm(new Forth::StdInStream());
+        term->loadStream(strm);
+    } else {
+        fprintf(stderr, "unable to load bootstrap.f");
+    }
 
     delete vm;
 
